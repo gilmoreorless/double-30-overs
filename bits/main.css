@@ -1,0 +1,88 @@
+body {
+    background-color: hsl(41, 41%, 97%);
+    color: hsl(107, 11%, 15%);
+    font: 16px/1.25 "Lucida Sans", "Lucida Grande", "Droid Sans", sans-serif;
+    margin: 1em;
+    max-width: 960px;
+}
+ol {
+    list-style-type: lower-alpha;
+}
+a {
+    color: hsl(107, 31%, 35%);
+    text-decoration: underline;
+}
+a:hover, a:active {
+    text-decoration: none;
+}
+
+/* Snide asides */
+.snide-aside {
+    display: block;
+    font-size: 85%;
+    padding-left: 2em;
+}
+.snide-aside::before {
+    content: '(';
+}
+.snide-aside::after {
+    content: ')';
+}
+
+/* Mythbusters */
+.mythbusters-confirmed {
+    background-color: #885B22;
+    border-radius: 0.25em;
+    box-shadow: 0 0 6px 2px hsl(51, 55%, 9%) inset;
+    color: hsl(51, 55%, 89%);
+    display: inline-block;
+    font-family: Consolas, Menlo, "Courier New", monospace;
+    font-size: 1.25em;
+    font-weight: normal;
+    line-height: 1;
+    margin-top: 0.25em;
+    padding: 0.25em;
+    text-shadow: 0 1px 6px hsl(51, 55%, 9%);
+    text-transform: uppercase;
+    transform: rotate(-5deg);
+}
+
+/* Graphs */
+odi-graph {
+}
+odi-graph .description {
+    height: 1px;
+    left: -10000px;
+    overflow: hidden;
+    position: absolute;
+    top: auto;
+    width: 1px;
+}
+
+
+/**
+ * BREAKPOINT: Wide enough for two columns
+ */
+@media (min-width: 40em) {
+    /* Put the snide asides over to the right */
+    .snide-aside {
+        display: inline;
+        float: right;
+        margin-right: -53.6%;
+        padding: 0;
+        width: 40%;
+    }
+    .snide-aside::before, .snide-aside::after {
+        content: '';
+    }
+    .snide-aside .snide-aside-mark {
+        margin-left: -0.55em;
+    }
+}
+
+@media (min-width: 992px) {
+    body {
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
