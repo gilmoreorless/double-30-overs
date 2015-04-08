@@ -3,6 +3,24 @@
         data: []
     };
 
+    function RollingAverage(rollingWindow) {
+        this.values = [];
+
+        this.push = function () {
+            this.values.push.apply(this.values, arguments);
+            while (this.values.length > rollingWindow) {
+                this.values.shift();
+            }
+        };
+    }
+
+    function average(arr) {
+        var values = arr.values || arr;
+        var avg = d3.mean(values);
+        avg = Math.round(avg * 6) / 6; // Round to balls only
+        return avg;
+    }
+
     function unpack(data) {
         var ret = [];
         if (!data.length) {
@@ -35,6 +53,7 @@
         for (var i = 0, ii = queue._q.length; i < ii; i++) {
             var bits = queue._q[i];
             bits[1].call(bits[0]);
+            return;
         }
         queue._q = [];
     }
@@ -42,6 +61,24 @@
 
     d3.json('data/half-scores-packed.json', function (data) {
         stats.data = unpack(data);
+
+        var avgAll = [];
+        var avgRolling = new RollingAverage(100);
+
+        stats.data.forEach(function (inn) {
+            // Provide a unique ID for each innings
+            inn.id = inn.matchid + '-' + inn.inn;
+            // Calculate extra data
+            inn.double_30_over_score = inn.score_30_overs * 2;
+            inn.half_score_normalised = inn.half_score_overs + (inn.half_score_balls / 6);
+
+            // Calculate averages
+            avgAll.push(inn.half_score_normalised);
+            inn.average = average(avgAll);
+
+            avgRolling.push(inn.half_score_normalised);
+            inn.rolling_average = average(avgRolling);
+        });
         clearQueue();
     });
 
@@ -59,6 +96,7 @@
             elem.graph = new ODIGraph();
             queue(elem, function () {
                 elem.graph.init(stats.data);
+                elem.graph.render(elem);
             });
         }
     });

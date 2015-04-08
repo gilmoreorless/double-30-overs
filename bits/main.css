@@ -49,6 +49,9 @@ a:hover, a:active {
 
 /* Graphs */
 odi-graph {
+    border: 1px dashed red;
+    display: block;
+    width: 100%;
 }
 odi-graph .description {
     height: 1px;
@@ -57,6 +60,33 @@ odi-graph .description {
     position: absolute;
     top: auto;
     width: 1px;
+}
+odi-graph svg {
+    height: 200px;
+    font-size: 0.75em;
+    width: 100%;
+}
+odi-graph .domain,
+odi-graph .tick line {
+    fill: none;
+    stroke: #000;
+}
+odi-graph .over-30 line {
+    stroke: #666;
+    stroke-dasharray: 2 2;
+}
+odi-graph .over-30 text {
+    fill: #666;
+}
+odi-graph .innings-mark {
+    fill: #99f;
+}
+odi-graph .line-average {
+    fill: none;
+    stroke: #f90;
+}
+odi-graph .line-average-rolling {
+    stroke: #690;
 }
 
 
