@@ -1,5 +1,5 @@
 (function () {
-    var stats = {
+    var stats = window.stats = {
         data: []
     };
 
@@ -82,6 +82,42 @@
         clearQueue();
     });
 
+
+    /**
+     * <odi-graph> custom element.
+     * ___________________________
+     *
+     * Basic usage:
+     *
+     *   <odi-graph>Text description as a fallback</odi-graph>
+     *
+     * Attributes (all are optional):
+     *
+     *   <odi-graph rolling-avg>
+     *     Include a rolling average line (off by default)
+     *
+     *   <odi-graph start="yyyy-mm-dd" end="yyyy-mm-dd">
+     *     Specify start/end dates (inclusive)
+     *
+     *   <odi-graph filter="team=Australia;inn=t1">
+     *     Specify data filters.
+     *     Filters are separated by semi-colons and in the format "key=value"
+     *
+     *   <odi-graph highlight="World Cup 2015:yyyy-mm-dd,yyyy-mm-dd; name:start,end">
+     *     Add labelled highlight regions with start and end dates (inclusive)
+     *
+     * ___________________________
+     *
+     * TODO:
+     *
+     * - Make rolling average optional
+     * - Specify filters
+     *     - Date ranges
+     *     - 1st/2nd innings
+     *     - Teams
+     *     - Grounds
+     * - Specify highlight regions
+     */
     skate('odi-graph', {
         attached: function (elem) {
             // Move the descriptive text into a hidden span

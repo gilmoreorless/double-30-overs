@@ -80,6 +80,7 @@ odi-graph .over-30 text {
 }
 odi-graph .innings-mark {
     fill: #99f;
+    opacity: 0.2;
 }
 odi-graph .line-average {
     fill: none;
