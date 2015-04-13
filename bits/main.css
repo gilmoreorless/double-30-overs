@@ -49,7 +49,6 @@ a:hover, a:active {
 
 /* Graphs */
 odi-graph {
-    border: 1px dashed red;
     display: block;
     width: 100%;
 }

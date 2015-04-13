@@ -8,18 +8,39 @@
     };
 
 
+    /*** RollingAverage ***/
+
+    function RollingAverage(rollingWindow) {
+        this.values = [];
+
+        this.push = function () {
+            this.values.push.apply(this.values, arguments);
+            while (this.values.length > rollingWindow) {
+                this.values.shift();
+            }
+        };
+    }
+
+    function average(arr) {
+        var values = arr.values || arr;
+        var avg = d3.mean(values);
+        avg = Math.round(avg * 6) / 6; // Round to balls only
+        return avg;
+    }
+
 
     /*** ODIGraph ***/
 
 
-    var ODIGraph = window.ODIGraph = function (opts) {
-        this.opts = opts;
+    var ODIGraph = window.ODIGraph = function () {
         this.data = [];
+        this.inited = false;
     };
 
     var gproto = ODIGraph.prototype;
 
     gproto.init = function (data, config) {
+        this.inited = true;
         this.data = data;
         console.log('init graph', data.length);
         this.graph = chartTemplate(this.data);
@@ -47,6 +68,7 @@
      * TODO:
      *
      * - Auto-calculate y-axis domain
+     * - Option to hide innings data points
      * - Show vertical line on hover
      * - Show data details on hover
      * - Legend with toggleable data points
@@ -54,19 +76,20 @@
      * - Highlight regions
      * - Highlight stddev for averages
      * - Hover on rolling average highlights points/window for previous 100 matches
-     * - Toggle between raw and rounded-to-balls values for averages
      * - Allow dynamic updates
      */
-    function chartTemplate(data) {
+    function chartTemplate(rawData) {
         var options = {
             xUseDates: true,
-            showRollingAverage: false
+            showRollingAverage: false,
+            dateStart: null,
+            dateEnd: null
         };
-
+        var data = rawData;
         var hasRendered = false;
+        var curFilters;
 
         function chart(selection) {
-            console.log(data, selection);
             var bits = chart.bits = {};
             var nodes = chart.nodes = {};
 
@@ -143,17 +166,67 @@
             chart.render();
         }
 
+        function filterData() {
+            var dateStart, dateEnd;
+            var hasDateFilters = false;
+            options.filters.forEach(function (f) {
+                if (f.key.substr(0, 5) === 'date/') {
+                    hasDateFilters = true;
+                    if (f.key === 'date/start') {
+                        dateStart = new Date(f.value);
+                    }
+                    if (f.key === 'date/end') {
+                        dateEnd = new Date(f.value);
+                    }
+                }
+            });
+            var newData = rawData.filter(function (d) {
+                if (hasDateFilters) {
+                    var date = new Date(d.date);
+                    if (
+                        (dateStart && date < dateStart) ||
+                        (dateEnd && date > dateEnd)
+                    ) {
+                        return false;
+                    }
+                }
+                // TODO: More filters
+                return true;
+            });
+
+            // Update averages
+            var avgAll = [];
+            var avgRolling = new RollingAverage(100);
+            newData.forEach(function (inn) {
+                avgAll.push(inn.half_score_normalised);
+                inn.average = average(avgAll);
+
+                avgRolling.push(inn.half_score_normalised);
+                inn.rolling_average = average(avgRolling);
+            });
+
+            return newData;
+        }
+
         chart.render = function () {
             hasRendered = true;
 
             var bits = chart.bits;
             var nodes = chart.nodes;
 
+            // Update data with filters if needed
+            var filtersKey = JSON.stringify(options.filters);
+            if (filtersKey !== curFilters) {
+                data = filterData();
+                curFilters = filtersKey;
+            }
+
             if (options.xUseDates) {
                 bits.xScale.domain([new Date(data[0].date), new Date(data[data.length - 1].date)]);
             } else {
                 bits.xScale.domain([0, data.length - 1]);
             }
+            nodes.xAxis.call(bits.xAxis);
 
 
             /*** Helpers ***/
@@ -234,6 +307,8 @@
             for (var key in config) {
                 options[key] = config[key];
             }
+            console.log('Update config', config);
+            // Re-render chart if required
             if (hasRendered) {
                 chart.render();
             }

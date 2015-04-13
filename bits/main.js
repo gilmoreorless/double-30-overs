@@ -3,24 +3,6 @@
         data: []
     };
 
-    function RollingAverage(rollingWindow) {
-        this.values = [];
-
-        this.push = function () {
-            this.values.push.apply(this.values, arguments);
-            while (this.values.length > rollingWindow) {
-                this.values.shift();
-            }
-        };
-    }
-
-    function average(arr) {
-        var values = arr.values || arr;
-        var avg = d3.mean(values);
-        avg = Math.round(avg * 6) / 6; // Round to balls only
-        return avg;
-    }
-
     function unpack(data) {
         var ret = [];
         if (!data.length) {
@@ -53,7 +35,6 @@
         for (var i = 0, ii = queue._q.length; i < ii; i++) {
             var bits = queue._q[i];
             bits[1].call(bits[0]);
-            return;
         }
         queue._q = [];
     }
@@ -62,22 +43,12 @@
     d3.json('data/half-scores-packed.json', function (data) {
         stats.data = unpack(data);
 
-        var avgAll = [];
-        var avgRolling = new RollingAverage(100);
-
         stats.data.forEach(function (inn) {
             // Provide a unique ID for each innings
             inn.id = inn.matchid + '-' + inn.inn;
             // Calculate extra data
             inn.double_30_over_score = inn.score_30_overs * 2;
             inn.half_score_normalised = inn.half_score_overs + (inn.half_score_balls / 6);
-
-            // Calculate averages
-            avgAll.push(inn.half_score_normalised);
-            inn.average = average(avgAll);
-
-            avgRolling.push(inn.half_score_normalised);
-            inn.rolling_average = average(avgRolling);
         });
         clearQueue();
     });
@@ -93,10 +64,13 @@
      *
      * Attributes (all are optional):
      *
-     *   <odi-graph rolling-avg>
+     *   <odi-graph rolling-avg="true">
      *     Include a rolling average line (off by default)
      *
-     *   <odi-graph start="yyyy-mm-dd" end="yyyy-mm-dd">
+     *   <odi-graph innings-points="false">
+     *     Don't show data points for individual innings (on by default)
+     *
+     *   <odi-graph date-start="yyyy-mm-dd" date-end="yyyy-mm-dd">
      *     Specify start/end dates (inclusive)
      *
      *   <odi-graph filter="team=Australia;inn=t1">
@@ -105,18 +79,6 @@
      *
      *   <odi-graph highlight="World Cup 2015:yyyy-mm-dd,yyyy-mm-dd; name:start,end">
      *     Add labelled highlight regions with start and end dates (inclusive)
-     *
-     * ___________________________
-     *
-     * TODO:
-     *
-     * - Make rolling average optional
-     * - Specify filters
-     *     - Date ranges
-     *     - 1st/2nd innings
-     *     - Teams
-     *     - Grounds
-     * - Specify highlight regions
      */
     skate('odi-graph', {
         attached: function (elem) {
@@ -126,14 +88,108 @@
             desc.textContent = elem.textContent;
             elem.innerHTML = '';
             elem.appendChild(desc);
-            console.log(elem, elem.innerHTML);
+            console.log('attached', elem);
 
             // Create the graph
             elem.graph = new ODIGraph();
             queue(elem, function () {
-                elem.graph.init(stats.data);
-                elem.graph.render(elem);
+                elem.graph
+                    .init(stats.data, configMapper(elem))
+                    .render(elem);
             });
+        },
+        attributes: {
+            'rolling-avg': attrSetter,
+            'innings-points': attrSetter,
+            'date-start': attrSetter,
+            'date-end': attrSetter,
+            'filter': attrSetter,
+            'highlight': attrSetter
         }
     });
+
+    function configMapper(elem) {
+        var config = {
+            showRollingAverage: elem.rollingAvg === 'true',
+            showInningsPoints: elem.inningsPoints !== 'false'
+        };
+        var filters = [];
+        if (elem.dateStart) {
+            filters.push({key: 'date/start', value: elem.dateStart});
+        }
+        if (elem.dateEnd) {
+            filters.push({key: 'date/end', value: elem.dateEnd});
+        }
+        if (elem.filters) {
+            filters = filters.concat(parseFilters(elem.filters));
+        }
+        config.filters = filters;
+        if (elem.highlight) {
+            config.highlights = parseHighlights(elem.highlight);
+        }
+        return config;
+    }
+
+    /**
+     * Convert `filter` attribute strings into filter config objects
+     * @param  {string} filterStr String from a `filter` attribute
+     * @return {array}            List of valid filter objects with `key` and `value` properties
+     * @example
+     * Input:  "team=Australia;inn=t1"
+     * Output: [{key: "team", value: "Australia"}, {key: "inn", value: "t1"}]
+     */
+    function parseFilters(filterStr) {
+        var filters = filterStr.split(';').map(function (filter) {
+            var parts = filter.split('=').map(function (s) { return s.trim(); });
+            if (parts.length > 1) {
+                return {key: parts[0], value: parts[1]};
+            }
+            return false;
+        // Get rid of falsey values
+        }).filter(function (f) {
+            return !!f;
+        });
+        return filters;
+    }
+
+    /**
+     * Convert `highlight` attribute strings into highlight config objects
+     * @param  {string} highlightStr String from a `highlight` attribute
+     * @return {array}               List of valid highlight objects with ??? properties
+     * @example
+     * Input:  "June 2014:2014-06-01,2014-06-30; ..."
+     * Output: [{name: "June 2014", start: "2014-06-01", end: "2014-06-30"}, ...]
+     */
+    function parseHighlights(highlightStr) {
+        var highlights = highlightStr.split(';').map(function (highlight) {
+            var ret = {};
+            var parts = highlight.split(':');
+            if (parts.length > 1) {
+                ret.name = parts[0].trim();
+                var dates = parts[1].split(',').map(function (s) { return s.trim(); });
+                if (dates.length) {
+                    ret.start = dates[0];
+                    if (dates.length > 1) {
+                        ret.end = dates[1];
+                    }
+                }
+                return ret;
+            }
+            return false;
+        // Get rid of falsey values
+        }).filter(function (f) {
+            return !!f;
+        });
+        return highlights;
+    }
+
+    function attrSetter(elem, data) {
+        console.log('ATTR: ', data, elem);
+        if (data.newValue !== data.oldValue) {
+            if (elem.graph && elem.graph.inited) {
+                console.log('Update config');
+                elem.graph.config(configMapper(elem));
+            }
+        }
+    }
 })();

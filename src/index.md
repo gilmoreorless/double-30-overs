@@ -53,15 +53,22 @@ The second question I wanted the answer to was: Has the overall pattern of scori
 
 In order to find the answer, I graphed out a 100-innings rolling average, to give a better indication of trends over time.
 
-<odi-graph>with rolling avg</odi-graph>
+<odi-graph rolling-avg="true" innings-points="false">IMAGE: A graph showing a rolling average average halfway mark as described in the next paragraph.</odi-graph>
 
 This shows a few more peaks and troughs, reaching a lowest point of 27.5 overs in 2002, then jumping up to 29.4 overs in 2004. After another drop to 28.3 overs in 2006, the rolling average remained relatively stable between 29.1 and 29.4 overs for many years. Since the beginning of 2013, the scoring rate has significantly increased, bringing the average for the most recent 100 innings (which reached 50 overs) up to 30.5 overs – the highest it’s ever been.
 
 One reason for the higher scoring – given by commentators and armchair experts alike – has been the [change in rules for fielding restrictions](http://www.espncricinfo.com/ci-icc/content/story/588728.html) in late 2012. The reduction from 4 to 3 fielders outside the 30-yard circle (in the non-Powerplay overs) has provided more opportunities for batsmen to score boundaries by hitting over the top of fielders. But does this theory hold true?
 
-The rolling averages listed above certainly indicate a change in scoring patterns around the same time. Just how much of an effect did the fielding restriction changes have? I compared two groups of innings: One from the rule change on October 30, 2002 until the World Cup final on March 29, 2015 (a period of 2 years, 5 months), and one group from the equivalent time period before the change (giving a start date of May 30, 2010).
+The rolling averages listed above certainly indicate a change in scoring patterns around the same time. Just how much of an effect did the fielding restriction changes have? I compared two groups of innings: One from the rule change on October 30, 2012 until the World Cup final on March 29, 2015 (a period of 2 years, 5 months), and one group from the equivalent time period before the change (giving a start date of May 30, 2010).
 
-<odi-graph>grouped: 2010-05-30 to 2012-10-29; 2012-10-30 to 2015-03-29</odi-graph>
+<odi-graph
+    rolling-avg="true"
+    date-start="2010-05-30"
+    date-end="2015-03-29"
+    highlight="
+        Before restriction changes:2010-05-30,2012-10-29;
+        After restriction changes:2012-10-30,2015-03-29">
+IMAGE: Two highlighted sets of data show ??? WORK SHIT OUT.</odi-graph>
 
 Here we see that ??? TODO: GRAPH THE DATA AND WORK SHIT OUT.
 
