@@ -67,7 +67,6 @@
     /**
      * TODO:
      *
-     * - Auto-calculate y-axis domain
      * - Option to hide innings data points
      * - Show vertical line on hover
      * - Show data details on hover
@@ -95,29 +94,29 @@
 
             /*** Calculate parameters ***/
 
-            var padding = {
+            chart.dims = {};
+            var padding = chart.dims.padding = {
                 top: 10,
                 left: 30,
                 right: 60,
-                bottom: 20
+                bottom: 20,
+                yAxis: 20
             };
-            var width = parseFloat(selection.style('width')) || 0;
-            var height = parseFloat(selection.style('height')) || 0;
-            var innerWidth = width - padding.left - padding.right;
-            var innerHeight = height - padding.top - padding.bottom;
+            var width = chart.dims.width =  parseFloat(selection.style('width')) || 0;
+            var height = chart.dims.height = parseFloat(selection.style('height')) || 0;
+            var innerWidth = chart.dims.innerWidth = width - padding.left - padding.right;
+            var innerHeight = chart.dims.innerHeight = height - padding.top - padding.bottom;
 
 
             /*** Build components ***/
 
             bits.xScale = d3.time.scale()
-                .domain([new Date(data[0].date), new Date(data[data.length - 1].date)])
                 .range([0, innerWidth]);
             bits.xAxis = d3.svg.axis()
                 .scale(bits.xScale)
                 .orient('bottom');
 
             bits.yScale = d3.scale.linear()
-                .domain([10, 50])
                 .range([innerHeight, 0]);
             bits.yAxis = d3.svg.axis()
                 .scale(bits.yScale)
@@ -133,27 +132,23 @@
             // Axes
             nodes.xAxis = nodes.root.append('g')
                 .attr('class', 'axis-x')
-                .translate(padding.left, height - padding.bottom)
-                .call(bits.xAxis);
+                .translate(padding.left, height - padding.bottom);
             nodes.yAxis = nodes.root.append('g')
                 .attr('class', 'axis-y')
-                .translate(padding.left, padding.top)
-                .call(bits.yAxis);
+                .translate(padding.left, padding.top);
 
             // 30-over mark
             nodes.over30 = nodes.root.append('g')
                 .attr('class', 'over-30')
                 .translate(padding.left, padding.top);
-            nodes.over30.append('line')
+            nodes.over30line = nodes.over30.append('line')
                 .attr('x', 0)
                 .attr('y', 0)
                 .attr('x2', innerWidth)
-                .attr('y2', 0)
-                .translate(0, bits.yScale(30));
-            nodes.over30.append('text')
+                .attr('y2', 0);
+            nodes.over30text = nodes.over30.append('text')
                 .text('30 overs')
-                .attr('y', 3)
-                .translate(innerWidth + 5, bits.yScale(30));
+                .attr('y', 3);
 
             // Groups for showing data
             nodes.dataGroupAll = nodes.root.append('g')
@@ -208,6 +203,38 @@
             return newData;
         }
 
+        /**
+         * Auto-calculate the best domain values for the y axis
+         */
+        function getOversDomain() {
+            var limitMin = 10, limitMax = 50;
+            var min, max;
+
+            var overs = d3.merge(data.map(function (d) {
+                var values = [d.average];
+                if (options.showRollingAverage) {
+                    values.push(d.rolling_average);
+                }
+//                 if (options.showInningsPoints) {
+                    values.push(d.half_score_normalised);
+//                 }
+                return values;
+            }));
+            min = d3.min(overs);
+            max = d3.max(overs);
+
+            // Account for padding
+            // Math.max(d3.min(overs), limitMin)
+            var scale = d3.scale.linear()
+                .domain([0, chart.dims.innerHeight])
+                .range([0, max - min]);
+            var padding = scale(chart.dims.padding.yAxis);
+            min = Math.round(Math.max(min - padding, limitMin));
+            max = Math.round(Math.min(max + padding, limitMax));
+
+            return [min, max];
+        }
+
         chart.render = function () {
             hasRendered = true;
 
@@ -221,12 +248,12 @@
                 curFilters = filtersKey;
             }
 
+            bits.yScale.domain(getOversDomain());
             if (options.xUseDates) {
                 bits.xScale.domain([new Date(data[0].date), new Date(data[data.length - 1].date)]);
             } else {
                 bits.xScale.domain([0, data.length - 1]);
             }
-            nodes.xAxis.call(bits.xAxis);
 
 
             /*** Helpers ***/
@@ -249,6 +276,12 @@
             /*** Draw pretty things ***/
 
             var transTime = 1000;
+
+            // Axes, helper lines, etc.
+            nodes.xAxis.call(bits.xAxis);
+            nodes.yAxis.call(bits.yAxis);
+            nodes.over30line.translate(0, bits.yScale(30));
+            nodes.over30text.translate(chart.dims.innerWidth + 5, bits.yScale(30));
 
             // Dots for individual innings
             var inningsDots = nodes.dataGroupInnings
