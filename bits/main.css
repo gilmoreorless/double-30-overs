@@ -50,6 +50,8 @@ a:hover, a:active {
 /* Graphs */
 odi-graph {
     display: block;
+    position: relative;
+    overflow: visible;
     width: 100%;
 }
 odi-graph .description {
@@ -61,9 +63,11 @@ odi-graph .description {
     width: 1px;
 }
 odi-graph svg {
+    display: block;
     height: 200px;
     font-size: 0.75em;
     width: 100%;
+    display: block;
 }
 odi-graph .domain,
 odi-graph .tick line {
@@ -87,6 +91,54 @@ odi-graph .line-average {
 }
 odi-graph .line-average-rolling {
     stroke: #690;
+}
+odi-graph .hover-rule {
+    display: none;
+    stroke: red;
+}
+odi-graph .hover-rule.active {
+    display: inline;
+}
+odi-graph .hover-events {
+    opacity: 0;
+}
+odi-graph .tooltip {
+    background-color: gold;
+    border: 1px solid red;
+    border-radius: 2px;
+    display: none;
+    font-size: 0.75em;
+    margin-top: 8px;
+    width: 20em;
+    position: absolute;
+    transform: translate(-50%, 0);
+}
+odi-graph .tooltip::before,
+odi-graph .tooltip::after {
+    content: '';
+    border-style: solid;
+    border-width: 8px;
+    border-color: transparent transparent red transparent;
+    position: absolute;
+    width: 0;
+    height: 0;
+    left: 50%;
+    margin-left: -8px;
+    top: -16px;
+}
+odi-graph .tooltip::after {
+    border-bottom-color: grey;
+    top: -15px;
+}
+odi-graph .tooltip.active {
+    display: block;
+}
+odi-graph .tooltip-header {
+    background-color: gray;
+    color: white;
+    font-size: 1em;
+    margin: 0;
+    padding: 0.5em;
 }
 
 
