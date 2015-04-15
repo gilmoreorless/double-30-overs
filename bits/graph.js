@@ -42,7 +42,6 @@
     gproto.init = function (data, config) {
         this.inited = true;
         this.data = data;
-        console.log('init graph', data.length);
         this.graph = chartTemplate(this.data);
         if (config !== undefined) {
             this.config(config);
@@ -63,6 +62,21 @@
     };
 
 
+    function debounce(fn, time) {
+        var timeout;
+        return function bounced() {
+            var context = this;
+            var args = arguments;
+            if (timeout) {
+                clearTimeout(timeout);
+            }
+            timeout = setTimeout(function () {
+                clearTimeout(timeout);
+                fn.apply(context, args);
+            }, time);
+        };
+    }
+
     /**
      * TODO:
      *
@@ -71,7 +85,6 @@
      * - Highlight regions
      * - Highlight stddev for averages
      * - Hover on rolling average highlights points/window for previous 100 matches
-     * - Resize graph on window resize
      */
     function chartTemplate(rawData) {
         var options = {
@@ -95,29 +108,24 @@
             /*** Calculate parameters ***/
 
             chart.dims = {};
-            var padding = chart.dims.padding = {
+            chart.dims.padding = {
                 top: 10,
                 left: 30,
                 right: 60,
                 bottom: 70,
                 yAxis: 20
             };
-            var width = chart.dims.width =  parseFloat(nodes.svg.style('width')) || 0;
-            var height = chart.dims.height = parseFloat(nodes.svg.style('height')) || 0;
-            var innerWidth = chart.dims.innerWidth = width - padding.left - padding.right;
-            var innerHeight = chart.dims.innerHeight = height - padding.top - padding.bottom;
+            getDims();
 
 
             /*** Build components ***/
 
-            bits.xScale = d3.time.scale()
-                .range([0, innerWidth]);
+            bits.xScale = d3.time.scale();
             bits.xAxis = d3.svg.axis()
                 .scale(bits.xScale)
                 .orient('bottom');
 
-            bits.yScale = d3.scale.linear()
-                .range([innerHeight, 0]);
+            bits.yScale = d3.scale.linear();
             bits.yAxis = d3.svg.axis()
                 .scale(bits.yScale)
                 .orient('left')
@@ -132,20 +140,16 @@
 
             // Axes
             nodes.xAxis = nodes.root.append('g')
-                .attr('class', 'axis-x')
-                .translate(padding.left, height - padding.bottom);
+                .attr('class', 'axis-x');
             nodes.yAxis = nodes.root.append('g')
-                .attr('class', 'axis-y')
-                .translate(padding.left, padding.top);
+                .attr('class', 'axis-y');
 
             // 30-over mark
             nodes.over30 = nodes.root.append('g')
-                .attr('class', 'over-30')
-                .translate(padding.left, padding.top);
+                .attr('class', 'over-30');
             nodes.over30line = nodes.over30.append('line')
                 .attr('x', 0)
                 .attr('y', 0)
-                .attr('x2', innerWidth)
                 .attr('y2', 0);
             nodes.over30text = nodes.over30.append('text')
                 .text('30 overs')
@@ -153,8 +157,7 @@
 
             // Groups for showing data
             nodes.dataGroupAll = nodes.root.append('g')
-                .attr('class', 'data')
-                .translate(padding.left, padding.top);
+                .attr('class', 'data');
             nodes.dataGroupInnings = nodes.dataGroupAll.append('g').attr('class', 'data-innings');
             nodes.dataGroupAverage = nodes.dataGroupAll.append('g').attr('class', 'data-average');
             nodes.dataGroupRolling = nodes.dataGroupAll.append('g').attr('class', 'data-rolling-average');
@@ -164,15 +167,11 @@
                 .attr('class', 'hover-rule')
                 .attr('x', 0)
                 .attr('y', 0)
-                .attr('x2', 0)
-                .attr('y2', innerHeight);
+                .attr('x2', 0);
             nodes.eventRect = nodes.root.append('rect')
                 .attr('class', 'hover-events')
                 .attr('x', 0)
-                .attr('y', 0)
-                .attr('width', innerWidth)
-                .attr('height', innerHeight)
-                .translate(padding.left, padding.top);
+                .attr('y', 0);
 
             nodes.eventRect.on('mouseenter', function () {
                 chart.hover(true);
@@ -183,16 +182,52 @@
 
             // Tooltip
             nodes.tooltip = nodes.container.append('div')
-                .attr('class', 'tooltip')
-                .style('left', padding.left + 'px')
-                .style('top', (padding.top + innerHeight + 30) + 'px');
+                .attr('class', 'tooltip');
             nodes.tooltipHeader = nodes.tooltip.append('h6')
                 .attr('class', 'tooltip-header');
             nodes.tooltipContent = nodes.tooltip.append('div')
                 .attr('class', 'tooltip-content');
 
+            chart.resize();
             chart.render();
+
+            window.addEventListener('resize', debounce(function () {
+                getDims();
+                chart.resize();
+                chart.render();
+            }, 300), false);
         }
+
+        function getDims() {
+            chart.dims.width  = parseFloat(chart.nodes.svg.style('width'))  || 0;
+            chart.dims.height = parseFloat(chart.nodes.svg.style('height')) || 0;
+            chart.dims.innerWidth  = chart.dims.width  - chart.dims.padding.left - chart.dims.padding.right;
+            chart.dims.innerHeight = chart.dims.height - chart.dims.padding.top  - chart.dims.padding.bottom;
+        }
+
+        chart.resize = function () {
+            var bits = chart.bits;
+            var nodes = chart.nodes;
+            var dims = chart.dims;
+            var padding = dims.padding;
+
+            bits.xScale.range([0, dims.innerWidth]);
+            bits.yScale.range([dims.innerHeight, 0]);
+
+            nodes.xAxis.translate(padding.left, dims.height - padding.bottom);
+            nodes.yAxis.translate(padding.left, padding.top);
+            nodes.over30.translate(padding.left, padding.top);
+            nodes.over30line.attr('x2', dims.innerWidth);
+            nodes.dataGroupAll.translate(padding.left, padding.top);
+            nodes.hoverLine.attr('y2', dims.innerHeight);
+            nodes.eventRect
+                .attr('width', dims.innerWidth)
+                .attr('height', dims.innerHeight)
+                .translate(padding.left, padding.top);
+            nodes.tooltip
+                .style('left', padding.left + 'px')
+                .style('top', (padding.top + dims.innerHeight + 30) + 'px');
+        };
 
         chart.data = function (newData) {
             data = newData;
@@ -206,7 +241,6 @@
             for (var key in config) {
                 options[key] = config[key];
             }
-            console.log('Update config', config);
             // Re-render chart if required
             if (hasRendered) {
                 chart.render();

@@ -31,7 +31,6 @@
     queue._q = [];
 
     function clearQueue() {
-        console.log('clearQueue');
         for (var i = 0, ii = queue._q.length; i < ii; i++) {
             var bits = queue._q[i];
             bits[1].call(bits[0]);
@@ -88,7 +87,6 @@
             desc.textContent = elem.textContent;
             elem.innerHTML = '';
             elem.appendChild(desc);
-            console.log('attached', elem);
 
             // Create the graph
             elem.graph = new ODIGraph();
@@ -184,10 +182,8 @@
     }
 
     function attrSetter(elem, data) {
-        console.log('ATTR: ', data, elem);
         if (data.newValue !== data.oldValue) {
             if (elem.graph && elem.graph.inited) {
-                console.log('Update config');
                 elem.graph.config(configMapper(elem));
             }
         }
