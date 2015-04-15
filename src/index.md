@@ -108,7 +108,7 @@ Credits
 
 ### See also
 
-[An analyis of run-rates in the 2015 World Cup](http://www.espncricinfo.com/magazine/content/story/858093.html) on Cricinfo.
+[An analysis of run-rates in the 2015 World Cup](http://www.espncricinfo.com/magazine/content/story/858093.html) on Cricinfo.
 
 
 

@@ -64,7 +64,7 @@ odi-graph .description {
 }
 odi-graph svg {
     display: block;
-    height: 200px;
+    height: 250px;
     font-size: 0.75em;
     width: 100%;
     display: block;
@@ -82,19 +82,25 @@ odi-graph .over-30 text {
     fill: #666;
 }
 odi-graph .innings-mark {
-    fill: #99f;
+    fill: hsl(240, 90%, 73%);
     opacity: 0.2;
+}
+odi-graph .innings-mark.hovered {
+    opacity: 0.9;
+    stroke: hsl(240, 80%, 33%);
 }
 odi-graph .line-average {
     fill: none;
-    stroke: #f90;
+    stroke: hsl(25, 83%, 59%);
+    stroke-width: 2;
+    opacity: 0.8;
 }
 odi-graph .line-average-rolling {
-    stroke: #690;
+    stroke: hsl(197, 83%, 59%);
 }
 odi-graph .hover-rule {
     display: none;
-    stroke: red;
+    stroke: hsl(107, 51%, 35%);
 }
 odi-graph .hover-rule.active {
     display: inline;
@@ -103,50 +109,50 @@ odi-graph .hover-events {
     opacity: 0;
 }
 odi-graph .tooltip {
-    background-color: gold;
-    border: 1px solid red;
+    background-color: hsl(41, 81%, 91%);
+    border: 1px solid hsl(107, 51%, 35%);
     border-radius: 2px;
+    box-shadow: 0 3px 5px 2px rgba(0,0,0,0.5);
+
     display: none;
     font-size: 0.75em;
-    margin-top: 8px;
     width: 20em;
     position: absolute;
-    transform: translate(-50%, 0);
-}
-odi-graph .tooltip::before,
-odi-graph .tooltip::after {
-    content: '';
-    border-style: solid;
-    border-width: 8px;
-    border-color: transparent transparent red transparent;
-    position: absolute;
-    width: 0;
-    height: 0;
-    left: 50%;
-    margin-left: -8px;
-    top: -16px;
-}
-odi-graph .tooltip::after {
-    border-bottom-color: grey;
-    top: -15px;
+    z-index: 1;
 }
 odi-graph .tooltip.active {
     display: block;
 }
 odi-graph .tooltip-header {
-    background-color: gray;
+    background-color: hsl(107, 28%, 48%);
     color: white;
     font-size: 1em;
     margin: 0;
-    padding: 0.5em;
+    padding: 0.5em 1em;
+}
+odi-graph .tooltip-averages {
+    margin: 1em;
+}
+odi-graph .tooltip-innings-details {
+    margin: 1em 0;
+    border-top: 1px dashed hsl(41, 59%, 41%);
+    padding: 0 1em;
+}
+odi-graph .tooltip dt {
+    float: left;
+    width: 9em;
+}
+odi-graph .tooltip dd {
+    font-weight: bold;
+    margin: 0;
 }
 
 
 /**
  * BREAKPOINT: Wide enough for two columns
- */
-@media (min-width: 40em) {
-    /* Put the snide asides over to the right */
+ *\/
+@media (min-width: 400em) {
+    /* Put the snide asides over to the right *\/
     .snide-aside {
         display: inline;
         float: right;
@@ -161,6 +167,7 @@ odi-graph .tooltip-header {
         margin-left: -0.55em;
     }
 }
+*/
 
 @media (min-width: 992px) {
     body {

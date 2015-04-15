@@ -66,12 +66,12 @@
     /**
      * TODO:
      *
-     * - Show data details on hover (styling)
      * - Legend with toggleable data points
      * - Filtering
      * - Highlight regions
      * - Highlight stddev for averages
      * - Hover on rolling average highlights points/window for previous 100 matches
+     * - Resize graph on window resize
      */
     function chartTemplate(rawData) {
         var options = {
@@ -99,7 +99,7 @@
                 top: 10,
                 left: 30,
                 right: 60,
-                bottom: 20,
+                bottom: 70,
                 yAxis: 20
             };
             var width = chart.dims.width =  parseFloat(nodes.svg.style('width')) || 0;
@@ -184,7 +184,8 @@
             // Tooltip
             nodes.tooltip = nodes.container.append('div')
                 .attr('class', 'tooltip')
-                .style('top', padding.top + innerHeight + 'px');
+                .style('left', padding.left + 'px')
+                .style('top', (padding.top + innerHeight + 30) + 'px');
             nodes.tooltipHeader = nodes.tooltip.append('h6')
                 .attr('class', 'tooltip-header');
             nodes.tooltipContent = nodes.tooltip.append('div')
@@ -335,7 +336,7 @@
             nodes.over30text.translate(chart.dims.innerWidth + 5, bits.yScale(30));
 
             // Dots for individual innings
-            var inningsDots = nodes.dataGroupInnings
+            var inningsDots = nodes.inningsDots = nodes.dataGroupInnings
                 .selectAll('.innings-mark')
                 .data(options.showInningsPoints ? data : [], dataId);
             inningsDots.enter()
@@ -386,15 +387,34 @@
         chart.hover = function (isHovering) {
             chart.nodes.hoverLine.classed('active', isHovering);
             chart.nodes.tooltip.classed('active', isHovering);
+            if (!isHovering) {
+                chart.nodes.dataGroupInnings.selectAll('.hovered')
+                    .classed('hovered', false);
+            }
             var padding = chart.dims.padding;
+
             var moveListener = function () {
+                // Populate the tooltip
                 var mouse = d3.mouse(chart.nodes.eventRect.node());
                 var closestPoints = findClosestDataPoints(mouse[0]);
                 var pointX = padding.left + chart.bits.xScale(new Date(closestPoints[0].date));
                 fillTooltip(closestPoints);
 
+                // Highlight hovered dots (if available)
+                if (options.showInningsPoints) {
+                    if (chart.hover.curDots) {
+                        chart.hover.curDots.classed('hovered', false);
+                    }
+                    var ids = closestPoints.map(chart.bits.dataId);
+                    var dots = chart.nodes.inningsDots.filter(function (d) {
+                        return ids.indexOf(d.id) > -1;
+                    });
+                    dots.classed('hovered', true);
+                    chart.hover.curDots = dots;
+                }
+
+                // Position the hover indicator
                 chart.nodes.hoverLine.translate(pointX, padding.top);
-                chart.nodes.tooltip.style('left', pointX + 'px');
             };
             chart.nodes.eventRect.on('mousemove', isHovering ? moveListener : null);
         };
@@ -432,6 +452,15 @@
             return [overNum, overBalls].join('.');
         }
 
+        function oversText(value) {
+            return overs(value) + ' overs';
+        }
+
+        function addDataPair(list, pair) {
+            list.append('dt').text(pair[0]);
+            list.append('dd').text(pair[1]);
+        }
+
         function fillTooltip(points) {
             var cacheKey = points.map(function (d) { return d.id; }).join('|');
             if (fillTooltip.cacheKey === cacheKey) {
@@ -443,34 +472,40 @@
             var formatter = d3.time.format('%e %b %Y');
             chart.nodes.tooltipHeader.text(formatter(new Date(points[0].date)));
 
+            // Add averages
+            chart.nodes.tooltipContent.html('');
+            var avgList = chart.nodes.tooltipContent.append('div')
+                .attr('class', 'tooltip-averages')
+                .append('dl');
+            var lastPoint = points[points.length - 1];
+            addDataPair(avgList, ['Overall average', oversText(lastPoint.average)]);
+            if (options.showRollingAverage) {
+                addDataPair(avgList, ['Rolling average', oversText(lastPoint.rolling_average)]);
+            }
+
             // Build data lists
             var details = chart.nodes.tooltipContent
-                .selectAll('.innings-details').data(points, chart.bits.dataId);
-            details.exit().remove();
+                .selectAll('.tooltip-innings-details').data(points, chart.bits.dataId);
             var newDetails = details.enter().append('div')
-                .attr('class', 'innings-details');
+                .attr('class', 'tooltip-innings-details');
             newDetails.append('p').html(function (d) {
                 var ordinal = d.inn === 't1' ? '1st' : '2nd';
                 var lines = [
                     'Match #' + d.matchid + ', ' + ordinal + ' innings',
-                    strong(d.team) + ' against ' + strong(d.other_team) + ' at ' + strong(d.ground_name)
+                    strong(d.team) + ' against ' + strong(d.other_team),
+                    'at ' + strong(d.ground_name)
                 ];
                 return lines.join('<br>');
             });
 
-            newDetails.append('dl').call(function (dl) {
-                var d = dl.datum();
+            newDetails.append('dl').each(function (d) {
                 var pairs = [
                     ['Total score', d.total_runs + '/' + d.total_wickets],
                     ['Half score at', d.half_score_at + ' overs'],
-                    ['Overall average', overs(d.average) + ' overs']
                 ];
-                if (options.showRollingAverage) {
-                    pairs.push(['Rolling average', overs(d.rolling_average) + ' overs']);
-                }
+                var dl = d3.select(this);
                 pairs.forEach(function (pair) {
-                    dl.append('dt').text(pair[0]);
-                    dl.append('dd').text(pair[1]);
+                    addDataPair(dl, pair);
                 });
             });
         }
