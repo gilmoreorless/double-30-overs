@@ -73,6 +73,9 @@
      *
      * Attributes (all are optional):
      *
+     *   <odi-graph graph-title="This is a graph">
+     *     Add a title to the graph
+     *
      *   <odi-graph rolling-average="true">
      *     Include a rolling average line (off by default)
      *
@@ -112,6 +115,7 @@
             });
         },
         attributes: {
+            'graph-title': attrSetter,
             'rolling-average': attrSetter,
             'innings-points': attrSetter,
             'ybounds': attrSetter,
@@ -125,6 +129,7 @@
     function configMapper(elem) {
         var config = {
             showInningsPoints: elem.inningsPoints !== 'false'
+            title: elem.graphTitle || '',
             showRollingAverage: elem.rollingAverage === 'true',
         };
         if (elem.ybounds) {

@@ -69,6 +69,11 @@ odi-graph svg {
     width: 100%;
     display: block;
 }
+odi-graph .title {
+    font-size: 1.25em;
+    font-style: italic;
+    font-weight: bold;
+}
 odi-graph .domain,
 odi-graph .tick line {
     fill: none;

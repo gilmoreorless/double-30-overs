@@ -80,7 +80,6 @@
     /**
      * TODO:
      *
-     * - Title
      * - Legend with toggleable data points
      * - Highlight regions
      * - Highlight stddev for averages
@@ -89,6 +88,7 @@
     function chartTemplate(rawData) {
         var options = {
             xUseDates: true,
+            title: '',
             showRollingAverage: false,
             showInningsPoints: true,
             yBounds: [],
@@ -110,7 +110,7 @@
 
             chart.dims = {};
             chart.dims.padding = {
-                top: 10,
+                top: 25,
                 left: 30,
                 right: 60,
                 bottom: 70,
@@ -138,6 +138,12 @@
             // Overall group at half-pixel offset for crisper lines
             nodes.root = nodes.svg.append('g')
                 .translate(0.5, 0.5);
+
+            // Title
+            nodes.title = nodes.root.append('text')
+                .attr('class', 'title')
+                .attr('text-anchor', 'middle')
+                .attr('dy', '0.25em');
 
             // Axes
             nodes.xAxis = nodes.root.append('g')
@@ -206,6 +212,9 @@
             chart.dims.innerHeight = chart.dims.height - chart.dims.padding.top  - chart.dims.padding.bottom;
         }
 
+        /**
+         * Update all container node dimensions to match the SVG's current size
+         */
         chart.resize = function () {
             var bits = chart.bits;
             var nodes = chart.nodes;
@@ -215,6 +224,9 @@
             bits.xScale.range([0, dims.innerWidth]);
             bits.yScale.range([dims.innerHeight, 0]);
 
+            nodes.title
+                .attr('x', padding.left + (dims.innerWidth / 2))
+                .attr('y', padding.top / 2);
             nodes.xAxis.translate(padding.left, dims.height - padding.bottom);
             nodes.yAxis.translate(padding.left, padding.top);
             nodes.over30.translate(padding.left, padding.top);
@@ -320,7 +332,6 @@
             newData.forEach(function (inn) {
                 avgAll.push(inn.half_score_normalised);
                 inn.average = average(avgAll);
-
                 avgRolling.push(inn.half_score_normalised);
                 inn.rolling_average = average(avgRolling);
             });
@@ -367,6 +378,9 @@
             return [min, max];
         }
 
+        /**
+         * Draw all the data
+         */
         chart.render = function () {
             hasRendered = true;
 
@@ -409,6 +423,7 @@
             var transTime = 1000;
 
             // Axes, helper lines, etc.
+            nodes.title.text(options.title);
             nodes.xAxis.call(bits.xAxis);
             nodes.yAxis.call(bits.yAxis);
             nodes.over30line.translate(0, bits.yScale(30));
