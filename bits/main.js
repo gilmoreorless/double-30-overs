@@ -21,6 +21,16 @@
         return ret;
     }
 
+    function cloneData(data) {
+        return data.map(function (d) {
+            var obj = {};
+            for (var key in d) {
+                obj[key] = d[key];
+            }
+            return obj;
+        });
+    }
+
     function queue(context, callback) {
         if (stats.data.length) {
             callback.call(context);
@@ -63,18 +73,23 @@
      *
      * Attributes (all are optional):
      *
-     *   <odi-graph rolling-avg="true">
+     *   <odi-graph rolling-average="true">
      *     Include a rolling average line (off by default)
      *
      *   <odi-graph innings-points="false">
      *     Don't show data points for individual innings (on by default)
      *
+     *   <odi-graph ybounds="15,45">
+     *     Force y axis to have these bounds (in overs)
+     *
      *   <odi-graph date-start="yyyy-mm-dd" date-end="yyyy-mm-dd">
      *     Specify start/end dates (inclusive)
      *
-     *   <odi-graph filter="team=Australia;inn=t1">
+     *   <odi-graph filter="team=(Australia,England);inn=t1;ground_name=!Melbourne">
      *     Specify data filters.
-     *     Filters are separated by semi-colons and in the format "key=value"
+     *     Filters are separated by semi-colons and in the format "key=value" for simple matching,
+     *     or "key=(value1,value2)" for matching a list of values.
+     *     Prefix a value with "!" to negate the match - e.g. "key1=!(val1,val2);key2=!val3"
      *
      *   <odi-graph highlight="World Cup 2015:yyyy-mm-dd,yyyy-mm-dd; name:start,end">
      *     Add labelled highlight regions with start and end dates (inclusive)
@@ -92,13 +107,14 @@
             elem.graph = new ODIGraph();
             queue(elem, function () {
                 elem.graph
-                    .init(stats.data, configMapper(elem))
+                    .init(cloneData(stats.data), configMapper(elem))
                     .render(elem);
             });
         },
         attributes: {
-            'rolling-avg': attrSetter,
+            'rolling-average': attrSetter,
             'innings-points': attrSetter,
+            'ybounds': attrSetter,
             'date-start': attrSetter,
             'date-end': attrSetter,
             'filter': attrSetter,
@@ -108,9 +124,12 @@
 
     function configMapper(elem) {
         var config = {
-            showRollingAverage: elem.rollingAvg === 'true',
             showInningsPoints: elem.inningsPoints !== 'false'
+            showRollingAverage: elem.rollingAverage === 'true',
         };
+        if (elem.ybounds) {
+            config.yBounds = parseBounds(elem.ybounds);
+        }
         var filters = [];
         if (elem.dateStart) {
             filters.push({key: 'date/start', value: elem.dateStart});
@@ -118,8 +137,8 @@
         if (elem.dateEnd) {
             filters.push({key: 'date/end', value: elem.dateEnd});
         }
-        if (elem.filters) {
-            filters = filters.concat(parseFilters(elem.filters));
+        if (elem.filter) {
+            filters = filters.concat(parseFilters(elem.filter));
         }
         config.filters = filters;
         if (elem.highlight) {
@@ -129,18 +148,51 @@
     }
 
     /**
+     * Convert `ybounds` attribute strings into bounds config objects
+     * @param  {string} boundsStr String from a `ybounds` attribute
+     * @return {array}            List of bounds in [min, max] format
+     */
+    function parseBounds(boundsStr) {
+        var bounds = boundsStr
+            .split(',')
+            .slice(0, 2)
+            .map(function (b) {
+                return parseFloat(b) || 0;
+            });
+        bounds.sort();
+        return bounds;
+    }
+
+    /**
      * Convert `filter` attribute strings into filter config objects
      * @param  {string} filterStr String from a `filter` attribute
-     * @return {array}            List of valid filter objects with `key` and `value` properties
+     * @return {array}            List of valid filter objects with `key` and a value property, either:
+     *                                `value` for a single string value, or
+     *                                `values` for a list of string values
      * @example
-     * Input:  "team=Australia;inn=t1"
-     * Output: [{key: "team", value: "Australia"}, {key: "inn", value: "t1"}]
+     * Input:  "team=(Australia,England);inn=!t1"
+     * Output: [{key: "team", values: ["Australia", "England"]}, {key: "inn", value: "t1", negate: true}]
      */
     function parseFilters(filterStr) {
+        var reMultiValues = /^\(.*?\)$/;
+        var trimmer = function (s) {
+            return s.trim();
+        };
         var filters = filterStr.split(';').map(function (filter) {
-            var parts = filter.split('=').map(function (s) { return s.trim(); });
+            var parts = filter.split('=').map(trimmer);
             if (parts.length > 1) {
-                return {key: parts[0], value: parts[1]};
+                var obj = {key: parts[0]};
+                var value = parts[1];
+                if (value[0] === '!') {
+                    obj.negate = true;
+                    value = value.slice(1);
+                }
+                if (reMultiValues.test(value)) {
+                    obj.values = value.slice(1, -1).split(',').map(trimmer);
+                } else {
+                    obj.value = value;
+                }
+                return obj;
             }
             return false;
         // Get rid of falsey values

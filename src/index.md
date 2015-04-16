@@ -53,7 +53,7 @@ The second question I wanted the answer to was: Has the overall pattern of scori
 
 In order to find the answer, I graphed out a 100-innings rolling average, to give a better indication of trends over time.
 
-<odi-graph rolling-avg="true" innings-points="false">IMAGE: A graph showing a rolling average average halfway mark as described in the next paragraph.</odi-graph>
+<odi-graph rolling-average="true" innings-points="false">IMAGE: A graph showing a rolling average average halfway mark as described in the next paragraph.</odi-graph>
 
 This shows a few more peaks and troughs, reaching a lowest point of 27.5 overs in 2002, then jumping up to 29.4 overs in 2004. After another drop to 28.3 overs in 2006, the rolling average remained relatively stable between 29.1 and 29.4 overs for many years. Since the beginning of 2013, the scoring rate has significantly increased, bringing the average for the most recent 100 innings (which reached 50 overs) up to 30.5 overs – the highest it’s ever been.
 
@@ -62,7 +62,7 @@ One reason for the higher scoring – given by commentators and armchair experts
 The rolling averages listed above certainly indicate a change in scoring patterns around the same time. Just how much of an effect did the fielding restriction changes have? I compared two groups of innings: One from the rule change on October 30, 2012 until the World Cup final on March 29, 2015 (a period of 2 years, 5 months), and one group from the equivalent time period before the change (giving a start date of May 30, 2010).
 
 <odi-graph
-    rolling-avg="true"
+    rolling-average="true"
     date-start="2010-05-30"
     date-end="2015-03-29"
     highlight="
@@ -91,12 +91,18 @@ Conversely, the latest point in an innings for a team to reach its halfway score
 
 ### 1st vs 2nd innings
 
-???
+<odi-graph filter="inn=t1" ybounds="15,45" title="1st innings">IMAGE: A graph of scores in the first innings of a match only.</odi-graph>
+<odi-graph filter="inn=t2" ybounds="15,45" title="2nd innings">IMAGE: A graph of scores in the second innings of a match only.</odi-graph>
+
+There is a stark difference in averages for the two phases of a one-day match. The average halfway mark for teams in the first innings is **29.3** overs, while in the second innings it’s only **27.5** overs. It is harder to construct and pace an innings when chasing a total, meaning there a fewer teams managing to effect the same kind of increase in scoring rates in the last 10-15 overs.
+
+I should note, though, that the sample sizes are vastly different for the two sets of data. As mentioned earlier, there are **1173** data points for the first innings but only **175** for the second innings. Therefore, the above stats should be taken with healthy dose of skepticism.
 
 
 ### Test playing nations vs Associates
 
-???
+<odi-graph filter="team=(Australia,England,South Africa,West Indies,Zimbabwe,New Zealand,India,Sri Lanka,Pakistan,Bangladesh)" ybounds="15,45"></odi-graph>
+<odi-graph filter="team=!(Australia,England,South Africa,West Indies,Zimbabwe,New Zealand,India,Sri Lanka,Pakistan,Bangladesh)" ybounds="15,45"></odi-graph>
 
 
 

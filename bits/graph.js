@@ -80,8 +80,8 @@
     /**
      * TODO:
      *
+     * - Title
      * - Legend with toggleable data points
-     * - Filtering
      * - Highlight regions
      * - Highlight stddev for averages
      * - Hover on rolling average highlights points/window for previous 100 matches
@@ -91,6 +91,7 @@
             xUseDates: true,
             showRollingAverage: false,
             showInningsPoints: true,
+            yBounds: [],
             dateStart: null,
             dateEnd: null
         };
@@ -251,6 +252,7 @@
         function filterData() {
             var dateStart, dateEnd;
             var hasDateFilters = false;
+            var nonDateFilters = [];
             options.filters.forEach(function (f) {
                 if (f.key.substr(0, 5) === 'date/') {
                     hasDateFilters = true;
@@ -260,6 +262,8 @@
                     if (f.key === 'date/end') {
                         dateEnd = new Date(f.value);
                     }
+                } else {
+                    nonDateFilters.push(f);
                 }
             });
             var newData = rawData.filter(function (d) {
@@ -272,8 +276,42 @@
                         return false;
                     }
                 }
-                // TODO: More filters
-                return true;
+                if (!nonDateFilters.length) {
+                    return true;
+                }
+                var matchesFilter = function (filter) {
+
+                    // Short-circuit if the data doesn't have a value for this filter
+                    if (!(filter.key in d)) {
+                        return !!filter.negate;
+                    }
+
+                    var dataValue = d[filter.key];
+                    var hasMatch;
+
+                    // Check single value
+                    //   "k=v"
+                    //   "k=!v"
+                    if (filter.value) {
+                        hasMatch = dataValue === filter.value;
+
+                    // Check multiple values
+                    //   "k=(a,b,c)"   [OR]
+                    //   "k=!(a,b,c)"  [NOR]
+                    } else if (filter.values) {
+                        hasMatch = filter.values.some(function (value) {
+                            return dataValue === value;
+                        });
+                    }
+
+                    return filter.negate ? !hasMatch : hasMatch;
+                };
+
+                // Quick hack for more performant filter checking.
+                // As soon as a filter returns false, the rest are not checked.
+                return !nonDateFilters.some(function (filter) {
+                    return !matchesFilter(filter);
+                });
             });
 
             // Update averages
@@ -297,6 +335,9 @@
             var limitMin = 10, limitMax = 50;
             var min, max;
 
+            if (options.yBounds.length >= 2) {
+                return options.yBounds.slice(0, 2);
+            }
             var overs = d3.merge(data.map(function (d) {
                 var values = [d.average];
                 if (options.showRollingAverage) {
@@ -317,6 +358,11 @@
             var padding = scale(chart.dims.padding.yAxis);
             min = Math.round(Math.max(min - padding, limitMin));
             max = Math.round(Math.min(max + padding, limitMax));
+
+            // If one of the yBounds options is present, set that as the min value
+            if (options.yBounds.length === 1) {
+                min = options.yBounds[0];
+            }
 
             return [min, max];
         }
@@ -356,7 +402,6 @@
                     return bits.yScale(d[key]);
                 };
             };
-
 
 
             /*** Draw pretty things ***/
@@ -455,7 +500,6 @@
 
         function findClosestDataPoints(x) {
             var dataValue = chart.bits.xScale.invert(x);
-            // TODO: Make this more efficient
             var dist = Infinity;
             var points = [];
             for (var i = 0, ii = data.length; i < ii; i++) {
