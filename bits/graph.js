@@ -7,6 +7,51 @@
         return this.attr('transform', 'translate(' + x + ',' + y + ')');
     };
 
+    /**
+     * A cut-down copy of d3.svg.line()
+     * Key differences:
+     * - Replace .defined() with .broken() to break the line *without* skipping any data points
+     * - Hard-coded projection/interpolation
+     * - Removed any unneeded methods
+     */
+    d3.svg.breakableLine = function () {
+        var x = function (d) { return d[0]; },
+            y = function (d) { return d[1]; },
+            broken = function () { return false; },
+            interpolate = function (points) { return points.join('L'); };
+        function line(data) {
+            var segments = [], points = [], i = -1, n = data.length, d, fx = d3.functor(x), fy = d3.functor(y);
+            function segment() {
+                segments.push('M', interpolate(points));
+            }
+            while (++i < n) {
+                if (broken.call(this, d = data[i], i) && points.length) {
+                    segment();
+                    points = [];
+                }
+                points.push([ +fx.call(this, d, i), +fy.call(this, d, i) ]);
+            }
+            if (points.length) segment();
+            return segments.length ? segments.join('') : null;
+        }
+        line.x = function(_) {
+            if (!arguments.length) return x;
+            x = _;
+            return line;
+        };
+        line.y = function(_) {
+            if (!arguments.length) return y;
+            y = _;
+            return line;
+        };
+        line.broken = function(_) {
+            if (!arguments.length) return broken;
+            broken = _;
+            return line;
+        };
+        return line;
+    };
+
 
     /*** RollingAverage ***/
 
@@ -18,6 +63,10 @@
             while (this.values.length > rollingWindow) {
                 this.values.shift();
             }
+        };
+
+        this.reset = function () {
+            this.values = [];
         };
     }
 
@@ -92,6 +141,9 @@
             showRollingAverage: false,
             showInningsPoints: true,
             yBounds: [],
+            filters: [],
+            highlightRegions: [],
+            resetHighlightAverages: false,
             dateStart: null,
             dateEnd: null
         };
@@ -150,6 +202,10 @@
                 .attr('class', 'axis-x');
             nodes.yAxis = nodes.root.append('g')
                 .attr('class', 'axis-y');
+
+            // Highlight regions
+            nodes.highlights = nodes.root.append('g')
+                .attr('class', 'highlight-regions');
 
             // 30-over mark
             nodes.over30 = nodes.root.append('g')
@@ -229,6 +285,7 @@
                 .attr('y', padding.top / 2);
             nodes.xAxis.translate(padding.left, dims.height - padding.bottom);
             nodes.yAxis.translate(padding.left, padding.top);
+            nodes.highlights.translate(padding.left, 0);
             nodes.over30.translate(padding.left, padding.top);
             nodes.over30line.attr('x2', dims.innerWidth);
             nodes.dataGroupAll.translate(padding.left, padding.top);
@@ -262,9 +319,11 @@
 
 
         function filterData() {
-            var dateStart, dateEnd;
             var hasDateFilters = false;
             var nonDateFilters = [];
+            var highlightBoundaries = [];
+            var dateStart, dateEnd;
+
             options.filters.forEach(function (f) {
                 if (f.key.substr(0, 5) === 'date/') {
                     hasDateFilters = true;
@@ -278,6 +337,29 @@
                     nonDateFilters.push(f);
                 }
             });
+
+            if (options.resetHighlightAverages && options.highlightRegions) {
+                // highlightBoundaries == a list of Dates; averages get reset AFTER these dates
+                var dates = d3.set();
+                options.highlightRegions.forEach(function (region) {
+                    var start = new Date(region.start);
+                    var end = new Date(region.end);
+                    // Normalise so that they're always end dates
+                    start.setDate(start.getDate() - 1);
+                    [start, end].forEach(function (date) {
+                        // D3 sets use string keys, but we want to keep the Date objects,
+                        // so this can't just add everything to a set and be done.
+                        if (!dates.has(date)) {
+                            dates.add(date);
+                            highlightBoundaries.push(date);
+                        }
+                    });
+                });
+                highlightBoundaries.sort(function (a, b) {
+                    return a - b;
+                });
+            }
+
             var newData = rawData.filter(function (d) {
                 if (hasDateFilters) {
                     var date = new Date(d.date);
@@ -327,14 +409,31 @@
             });
 
             // Update averages
-            var avgAll = [];
+            var avgAll = new RollingAverage(Infinity);
             var avgRolling = new RollingAverage(100);
-            newData.forEach(function (inn) {
+            for (var i = 0, ii = newData.length; i < ii; i++) {
+                var inn = newData[i];
+
+                if (highlightBoundaries.length) {
+                    inn.reset_average = false;
+                    var date = new Date(inn.date);
+                    if (date > highlightBoundaries[0]) {
+                        if (avgAll.values.length) {
+                            inn.reset_average = true;
+                            avgAll.reset();
+                            avgRolling.reset();
+                        }
+                        while (date > highlightBoundaries[0]) {
+                            highlightBoundaries.shift();
+                        }
+                    }
+                }
+
                 avgAll.push(inn.half_score_normalised);
-                inn.average = average(avgAll);
                 avgRolling.push(inn.half_score_normalised);
+                inn.average = average(avgAll);
                 inn.rolling_average = average(avgRolling);
-            });
+            }
 
             return newData;
         }
@@ -416,6 +515,14 @@
                     return bits.yScale(d[key]);
                 };
             };
+            var dataLine = bits.dataLine = function (key) {
+                return d3.svg.breakableLine()
+                    .x(dataX)
+                    .y(dataY(key))
+                    .broken(function (d) {
+                        return d.reset_average;
+                    });
+            };
 
 
             /*** Draw pretty things ***/
@@ -428,6 +535,40 @@
             nodes.yAxis.call(bits.yAxis);
             nodes.over30line.translate(0, bits.yScale(30));
             nodes.over30text.translate(chart.dims.innerWidth + 5, bits.yScale(30));
+
+            // Highlight regions
+            options.highlightRegions.forEach(function (d) {
+                d.xStart = bits.xScale(new Date(d.start));
+                d.xEnd = bits.xScale(new Date(d.end));
+                d.xWidth = d.xEnd - d.xStart;
+            });
+            var colours = chart.colours();
+
+            var highlights = nodes.highlights
+                .selectAll('.region')
+                .data(options.highlightRegions);
+            highlights.enter()
+                .append('g')
+                .attr('class', 'region');
+            highlights.exit()
+                .remove();
+            nodes.highlights.selectAll('.background, .title').remove();
+            highlights.append('rect')
+                .attr('class', 'background')
+                .attr('x', function (d) { return d.xStart; })
+                .attr('y', 0)
+                .attr('height', chart.dims.padding.top + chart.dims.innerHeight)
+                .attr('width', function (d) { return d.xWidth; })
+                .style('fill', function (_, i) {
+                    return colours(i);
+                });
+            highlights.append('text')
+                .attr('class', 'title')
+                .attr('text-anchor', 'middle')
+                .attr('x', function (d) { return d.xStart + d.xWidth / 2; })
+                .attr('y', chart.dims.padding.top / 2)
+                .attr('dy', '0.25em')
+                .text(function (d) { return d.name; });
 
             // Dots for individual innings
             var inningsDots = nodes.inningsDots = nodes.dataGroupInnings
@@ -447,8 +588,7 @@
                 .attr('cy', dataY('half_score_normalised'));
 
             // Line for overall average
-            var lineAverage = d3.svg.line()
-                .x(dataX).y(dataY('average'));
+            var lineAverage = dataLine('average');
             var avgPath = nodes.dataGroupAverage
                 .selectAll('path')
                 .data([data]);
@@ -460,8 +600,7 @@
                 .attr('d', lineAverage);
 
             // Line for rolling average
-            var rollingAverage = d3.svg.line()
-                .x(dataX).y(dataY('rolling_average'));
+            var rollingAverage = dataLine('rolling_average');
             var rollPath = nodes.dataGroupRolling
                 .selectAll('path')
                 .data(options.showRollingAverage ? [data] : []);
@@ -476,6 +615,15 @@
             rollPath
                 .transition(transTime)
                 .attr('d', rollingAverage);
+        };
+
+        chart.colours = function () {
+            var colours = ['#c5b0d5', '#f47e7c', '#bcbd22', '#9edae5', '#2ca02c'];
+            // Set an explicit domain to work around a D3 bug with ordinal scales
+            var domain = colours.map(function (_, i) { return i; });
+            return d3.scale.ordinal()
+                .domain(domain)
+                .range(colours);
         };
 
         chart.hover = function (isHovering) {

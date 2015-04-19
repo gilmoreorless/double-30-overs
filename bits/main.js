@@ -96,6 +96,9 @@
      *
      *   <odi-graph highlight="World Cup 2015:yyyy-mm-dd,yyyy-mm-dd; name:start,end">
      *     Add labelled highlight regions with start and end dates (inclusive)
+     *
+     *   <odi-graph highlight="..." reset-highlight-averages="true">
+     *     Reset averages at highlighted area boundaries
      */
     skate('odi-graph', {
         attached: function (elem) {
@@ -122,15 +125,17 @@
             'date-start': attrSetter,
             'date-end': attrSetter,
             'filter': attrSetter,
-            'highlight': attrSetter
+            'highlight': attrSetter,
+            'reset-highlight-averages': attrSetter
         }
     });
 
     function configMapper(elem) {
         var config = {
-            showInningsPoints: elem.inningsPoints !== 'false'
             title: elem.graphTitle || '',
             showRollingAverage: elem.rollingAverage === 'true',
+            showInningsPoints: elem.inningsPoints !== 'false',
+            resetHighlightAverages: elem.resetHighlightAverages === 'true'
         };
         if (elem.ybounds) {
             config.yBounds = parseBounds(elem.ybounds);
@@ -147,7 +152,7 @@
         }
         config.filters = filters;
         if (elem.highlight) {
-            config.highlights = parseHighlights(elem.highlight);
+            config.highlightRegions = parseHighlights(elem.highlight);
         }
         return config;
     }

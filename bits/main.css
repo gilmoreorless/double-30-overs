@@ -15,6 +15,9 @@ a {
 a:hover, a:active {
     text-decoration: none;
 }
+h2, h3 {
+    margin-top: 1.5em;
+}
 
 /* Snide asides */
 .snide-aside {
@@ -78,6 +81,14 @@ odi-graph .domain,
 odi-graph .tick line {
     fill: none;
     stroke: #000;
+}
+odi-graph .region .background {
+    fill: #eee;
+    stroke: none;
+    opacity: 0.2;
+}
+odi-graph .region .title {
+    font-size: 1.16666667em;
 }
 odi-graph .over-30 line {
     stroke: #666;

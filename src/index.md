@@ -1,4 +1,4 @@
-“Double the 30-over score” – a cricket analysis
+“Double the 30-over score” &mdash; a cricket analysis
 =============================
 
 In one-day cricket there is an old maxim about trying to predict a team’s score, mostly referred to by commentators. It states that, on average, a team’s score at the end of its allotted 50 overs will be roughly double its score from the 30-over mark. Or, put more commonly, “Take the 30-over score and double it.”
@@ -66,25 +66,15 @@ One reason for the higher scoring – given by commentators and armchair experts
 
 The rolling averages listed above certainly indicate a change in scoring patterns around the same time. Just how much of an effect did the fielding restriction changes have? I compared two groups of innings: One from the rule change on October 30, 2012 until the World Cup final on March 29, 2015 (a period of 2 years, 5 months), and one group from the equivalent time period before the change (giving a start date of May 30, 2010).
 
-<!--
 <odi-graph
-    rolling-average="true"
     date-start="2010-05-30"
     date-end="2015-03-29"
     highlight="
         Before restriction changes:2010-05-30,2012-10-29;
         After restriction changes:2012-10-30,2015-03-29"
     reset-highlight-averages="true">
-IMAGE: Two highlighted sets of data show ??? WORK SHIT OUT.</odi-graph>
--->
-<odi-graph graph-title="May 30, 2010 to October 29, 2012"
-    date-start="2010-05-30"
-    date-end="2012-10-29">
-TEMP 1</odi-graph>
-<odi-graph graph-title="October 30, 2012 to March 29, 2015"
-    date-start="2012-10-30"
-    date-end="2015-03-29">
-TEMP 2</odi-graph>
+IMAGE: Two highlighted sets of data show consistently different averages for two equal time periods either side of the restriction changes.
+</odi-graph>
 
 Here we see that in the 2-and-a-half years leading up to the changes the average halfway mark never got above 30 overs, hovering consistently between 29 and 30 overs (with a highest point of 29.5 overs). After the rule changes there is a dinstinctly different pattern, where the average never drops _below_ 30 overs.
 
@@ -147,18 +137,6 @@ Credits
 The main inspirations for this were the [MBTA (Boston subway) data analysis](http://mbtaviz.github.io/) and some random conversations with fellow cricket tragics at work.
 
 All data originally came from [Cricinfo](http://www.espncricinfo.com/) and is probably under copyright, but it’s very hard to find any data usage guidelines on their website. These analyses were done as a personal hobby project only.
+Cricinfo also did [an analysis of run-rates in the 2015 World Cup](http://www.espncricinfo.com/magazine/content/story/858093.html) that is worth reading.
 
-### See also
-
-[An analysis of run-rates in the 2015 World Cup](http://www.espncricinfo.com/magazine/content/story/858093.html) on Cricinfo.
-
-
-
-* Overall
-* CWC15
-* Before/after new regulations in 2012
-* Best/worst teams
-* Best/worst venues
-* 1st/2nd innings
-* Test playing nations vs associates
-
+The rest of the content here is &copy; Gilmore Davidson. The source code is available on [GitHub](https://github.com/gilmoreorless/double-30-overs) for those interested.
