@@ -166,7 +166,8 @@
                 left: 30,
                 right: 60,
                 bottom: 70,
-                yAxis: 20
+                yAxis: 20,
+                xAxis: 3
             };
             getDims();
 
@@ -477,6 +478,24 @@
             return [min, max];
         }
 
+        function padXScale(domain) {
+            var min = domain[0], max = domain[1];
+            var useDates = min instanceof Date;
+
+            var scale = d3.scale.linear()
+                .domain([0, chart.dims.innerWidth])
+                .range([0, max - min]);
+            var padding = scale(chart.dims.padding.xAxis);
+            min = Math.round(+min - padding);
+            max = Math.round(+max + padding);
+
+            if (useDates) {
+                min = new Date(min);
+                max = new Date(max);
+            }
+            return [min, max];
+        }
+
         /**
          * Draw all the data
          */
@@ -494,11 +513,10 @@
             }
 
             bits.yScale.domain(getOversDomain());
-            if (options.xUseDates) {
-                bits.xScale.domain([new Date(data[0].date), new Date(data[data.length - 1].date)]);
-            } else {
-                bits.xScale.domain([0, data.length - 1]);
-            }
+            var xDomain = options.xUseDates ?
+                [new Date(data[0].date), new Date(data[data.length - 1].date)] :
+                [0, data.length - 1];
+            bits.xScale.domain(padXScale(xDomain));
 
 
             /*** Helpers ***/
