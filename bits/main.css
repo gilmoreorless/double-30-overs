@@ -53,6 +53,7 @@ h2, h3 {
 /* Graphs */
 odi-graph {
     display: block;
+    min-height: 250px;
     position: relative;
     overflow: visible;
     width: 100%;

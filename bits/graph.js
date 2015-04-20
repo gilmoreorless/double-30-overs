@@ -1,5 +1,25 @@
 (function () {
 
+    /*** Helpers ***/
+
+
+    function debounce(fn, time) {
+        var timeout;
+        return function bounced() {
+            var context = this;
+            var args = arguments;
+            if (timeout) {
+                clearTimeout(timeout);
+            }
+            timeout = setTimeout(function () {
+                clearTimeout(timeout);
+                fn.apply(context, args);
+            }, time);
+        };
+    }
+    window.debounce = debounce;
+
+
     /*** D3 extensions ***/
 
 
@@ -54,6 +74,7 @@
 
 
     /*** RollingAverage ***/
+
 
     function RollingAverage(rollingWindow) {
         this.values = [];
@@ -111,28 +132,8 @@
     };
 
 
-    function debounce(fn, time) {
-        var timeout;
-        return function bounced() {
-            var context = this;
-            var args = arguments;
-            if (timeout) {
-                clearTimeout(timeout);
-            }
-            timeout = setTimeout(function () {
-                clearTimeout(timeout);
-                fn.apply(context, args);
-            }, time);
-        };
-    }
-
     /**
-     * TODO:
-     *
-     * - Legend with toggleable data points
-     * - Highlight regions
-     * - Highlight stddev for averages
-     * - Hover on rolling average highlights points/window for previous 100 matches
+     * Main container. Calling this returns a new chart instance.
      */
     function chartTemplate(rawData) {
         var options = {

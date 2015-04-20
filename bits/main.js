@@ -1,4 +1,8 @@
 (function () {
+
+    /*** Data handling ***/
+
+
     var stats = window.stats = {
         data: []
     };
@@ -63,6 +67,48 @@
     });
 
 
+    /*** Element visibility checking ***/
+
+
+    function checkVisibility(elem) {
+        return verge.inY(elem, 200);
+    }
+
+    function callIfVisible(elem, callback) {
+        var isVisible = checkVisibility(elem);
+        if (isVisible) {
+            callback.call(elem);
+        }
+        return isVisible;
+    }
+
+    /**
+     * Fire a callback whenever an element becomes visible in the viewport
+     */
+    function whenVisible(elem, callback) {
+        elem.__visCheck = debounce(function visCheck() {
+            callIfVisible(elem, callback);
+        }, 300);
+        window.addEventListener('resize', elem.__visCheck, false);
+        window.addEventListener('scroll', elem.__visCheck, false);
+        elem.__visCheck();
+    }
+
+    /**
+     * Fire a callback the first time an element becomes visible in the viewport
+     */
+    function onceVisible(elem, callback) {
+        whenVisible(elem, function forgetVisibility() {
+            if (elem.__visCheck) {
+                window.removeEventListener('resize', elem.__visCheck, false);
+                window.removeEventListener('scroll', elem.__visCheck, false);
+                delete elem.__visCheck;
+            }
+            callback.call(elem);
+        });
+    }
+
+
     /**
      * <odi-graph> custom element.
      * ___________________________
@@ -112,9 +158,10 @@
             // Create the graph
             elem.graph = new ODIGraph();
             queue(elem, function () {
-                elem.graph
-                    .init(cloneData(stats.data), configMapper(elem))
-                    .render(elem);
+                elem.graph.init(cloneData(stats.data), configMapper(elem));
+                onceVisible(elem, function () {
+                    elem.graph.render(elem);
+                });
             });
         },
         attributes: {
