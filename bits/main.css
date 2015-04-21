@@ -79,7 +79,8 @@ odi-graph .title {
     font-weight: bold;
 }
 odi-graph .domain,
-odi-graph .tick line {
+odi-graph .tick line,
+odi-graph path.legend-example {
     fill: none;
     stroke: #000;
 }
@@ -98,7 +99,8 @@ odi-graph .over-30 line {
 odi-graph .over-30 text {
     fill: #666;
 }
-odi-graph .innings-mark {
+odi-graph .innings-mark,
+odi-graph .legend-item-innings .legend-example {
     fill: hsl(240, 90%, 73%);
     opacity: 0.2;
 }
@@ -106,13 +108,19 @@ odi-graph .innings-mark.hovered {
     opacity: 0.9;
     stroke: hsl(240, 80%, 33%);
 }
-odi-graph .line-average {
+odi-graph .legend-item-innings .legend-example {
+    opacity: 0.8;
+}
+odi-graph .line-average,
+odi-graph .legend-item-average .legend-example,
+odi-graph .legend-item-rolling-average .legend-example {
     fill: none;
     stroke: hsl(25, 83%, 59%);
     stroke-width: 2;
     opacity: 0.8;
 }
-odi-graph .line-average-rolling {
+odi-graph .line-average-rolling,
+odi-graph .legend-item-rolling-average .legend-example {
     stroke: hsl(197, 83%, 59%);
 }
 odi-graph .hover-rule {

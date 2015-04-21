@@ -136,7 +136,9 @@ Credits
 
 The main inspirations for this were the [MBTA (Boston subway) data analysis](http://mbtaviz.github.io/) and some random conversations with fellow cricket tragics at work.
 
-All data originally came from [Cricinfo](http://www.espncricinfo.com/) and is probably under copyright, but it’s very hard to find any data usage guidelines on their website. These analyses were done as a personal hobby project only.
+Statistics include all men’s One-Day Internationals from June 7th, 2001 to March 29, 2015.
+
+All data originally came from [Cricinfo](http://www.espncricinfo.com/) and are probably under copyright, but it’s very hard to find any data usage guidelines on their website. These analyses were done as a personal hobby project only.
 Cricinfo also did [an analysis of run-rates in the 2015 World Cup](http://www.espncricinfo.com/magazine/content/story/858093.html) that is worth reading.
 
 The rest of the content here is &copy; Gilmore Davidson. The source code is available on [GitHub](https://github.com/gilmoreorless/double-30-overs) for those interested.

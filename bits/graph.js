@@ -166,7 +166,7 @@
                 top: 25,
                 left: 30,
                 right: 60,
-                bottom: 70,
+                bottom: 50,
                 yAxis: 20,
                 xAxis: 3
             };
@@ -221,11 +221,16 @@
                 .attr('y', 3);
 
             // Groups for showing data
-            nodes.dataGroupAll = nodes.root.append('g')
-                .attr('class', 'data');
+            nodes.dataGroupAll = nodes.root.append('g').attr('class', 'data');
             nodes.dataGroupInnings = nodes.dataGroupAll.append('g').attr('class', 'data-innings');
             nodes.dataGroupAverage = nodes.dataGroupAll.append('g').attr('class', 'data-average');
             nodes.dataGroupRolling = nodes.dataGroupAll.append('g').attr('class', 'data-rolling-average');
+
+            // Legend
+            nodes.legend = nodes.root.append('g')
+                .attr('class', 'legend');
+            nodes.legendInner = nodes.legend.append('g')
+                .attr('class', 'legend-inner');
 
             // Line on hover
             nodes.hoverLine = nodes.root.append('line')
@@ -291,6 +296,7 @@
             nodes.over30.translate(padding.left, padding.top);
             nodes.over30line.attr('x2', dims.innerWidth);
             nodes.dataGroupAll.translate(padding.left, padding.top);
+            nodes.legend.translate(padding.left, dims.height - padding.bottom + 30); // +30 == Clear the x axis
             nodes.hoverLine.attr('y2', dims.innerHeight);
             nodes.eventRect
                 .attr('width', dims.innerWidth)
@@ -634,7 +640,93 @@
             rollPath
                 .transition(transTime)
                 .attr('d', rollingAverage);
+
+            // Legend
+            var legendData = [];
+            if (options.showInningsPoints) {
+                legendData.push({
+                    key: 'innings',
+                    type: 'circle',
+                    name: 'Halfway marks for individual innings',
+                });
+            }
+            legendData.push({
+                key: 'average',
+                type: 'path',
+                name: 'Average halfway mark'
+            });
+            if (options.showRollingAverage) {
+                legendData.push({
+                    key: 'rolling-average',
+                    type: 'path',
+                    name: '100-innings rolling average'
+                });
+            }
+            var legends = nodes.legendInner
+                .selectAll('.legend-item')
+                .data(legendData);
+            legends.exit()
+                .remove();
+
+            var hackyWidthCounter = 0;
+            var itemSpacing = 20;
+            legends.enter()
+                .append('g')
+                .attr('class', function (d) { return 'legend-item legend-item-' + d.key; })
+                .each(addLegend)
+            legends
+                .attr('transform', function (d) {
+                    var x = hackyWidthCounter;
+                    var w = d.totalWidth || parseFloat(d3.select(this).attr('total-width')) || 0;
+                    hackyWidthCounter += w + itemSpacing;
+                    return 'translate(' + x + ', 0)';
+                });
+            nodes.legendInner.translate(chart.dims.innerWidth - hackyWidthCounter + itemSpacing, 0);
         };
+
+        function addLegend(d) {
+            var legendHeight = 19;
+            var examplePadding = 7;
+            var exampleWidth; // Filled later
+
+            var elem = d3.select(this);
+            var example = elem.append(d.type)
+                .attr('class', 'legend-example');
+            var text = elem.append('text')
+                .attr('class', 'legend-name')
+                .attr('y', legendHeight / 2)
+                .attr('dy', '.35em')
+                .text(d.name);
+
+            if (d.type === 'circle') {
+                exampleWidth = 8;
+                example
+                    .attr('r', exampleWidth / 2)
+                    .attr('cx', exampleWidth / 2)
+                    .attr('cy', legendHeight / 2);
+            } else if (d.type === 'path') {
+                exampleWidth = 12;
+                example
+                    .attr('d', legendPath())
+                    .translate(0, (legendHeight - exampleWidth) / 2);
+            }
+
+            text.attr('x', exampleWidth + examplePadding);
+            d.textWidth = parseFloat(text.style('width')) || 0;
+            d.totalWidth = d.textWidth + exampleWidth + examplePadding;
+            elem.attr('total-width', d.totalWidth);
+        }
+
+        function legendPath() {
+            return [
+                'M' + [0, 12],
+                'L' + [
+                    4, 4,
+                    8, 8,
+                    12, 0
+                ]
+            ].join('');
+        }
 
         chart.colours = function () {
             var colours = ['#c5b0d5', '#f47e7c', '#bcbd22', '#9edae5', '#2ca02c'];
