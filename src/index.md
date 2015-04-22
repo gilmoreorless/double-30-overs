@@ -40,7 +40,7 @@ With the data gathered, I could finally start analysing these 1348 innings to de
 
 Over the last 14 years, teams that have played their full 50 overs have, on average, reached half their score at **29.2** overs (using standard cricket scoring notation, where “29.2 overs” means 29 overs and 2 balls, with 6 balls per over). This is close enough to 30 overs to give a Mythbusters-style <strong class="mythbusters-confirmed">confirmed</strong> to the old maxim.
 
-<odi-graph graph-title="Innings which reached 50 overs since June 2001">
+<odi-graph graph-title="Innings which reached 50 overs· since June 2001">
     IMAGE: A graph showing the average halfway mark as described in the next paragraph.
 </odi-graph>
 
@@ -55,7 +55,7 @@ The second question I wanted the answer to was: Has the overall pattern of scori
 
 In order to find the answer, I graphed out a 100-innings rolling average, to give a better indication of trends over time.
 
-<odi-graph graph-title="Overall average vs rolling average"
+<odi-graph graph-title="Overall vs rolling average"
     rolling-average="true" innings-points="false">
     IMAGE: A graph showing a rolling average average halfway mark as described in the next paragraph.
 </odi-graph>
@@ -70,8 +70,8 @@ The rolling averages listed above certainly indicate a change in scoring pattern
     date-start="2010-05-30"
     date-end="2015-03-29"
     highlight="
-        Before restriction changes:2010-05-30,2012-10-29;
-        After restriction changes:2012-10-30,2015-03-29"
+        Before· restriction changes:2010-05-30,2012-10-29;
+        After· restriction changes:2012-10-30,2015-03-29"
     reset-highlight-averages="true">
 IMAGE: Two highlighted sets of data show consistently different averages for two equal time periods either side of the restriction changes.
 </odi-graph>
@@ -118,7 +118,7 @@ I should note, though, that the sample sizes are vastly different for the two se
     ybounds="15,45">
     IMAGE: A graph of scores from test-playing nations.
 </odi-graph>
-<odi-graph graph-title="Associate nations and special teams"
+<odi-graph graph-title="Associates and others¬Associate nations and special teams"
     filter="team=!(Australia,England,South Africa,West Indies,Zimbabwe,New Zealand,India,Sri Lanka,Pakistan,Bangladesh)"
     ybounds="15,45">
     IMAGE: A graph of scores from non-test-playing nations.

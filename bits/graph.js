@@ -575,7 +575,7 @@
             var transTime = 1000;
 
             // Axes, helper lines, etc.
-            nodes.title.text(options.title);
+            fitText(nodes.title, options.title, dims.width);
             nodes.xAxis.call(bits.xAxis);
             nodes.yAxis.call(bits.yAxis);
             nodes.over30line.translate(0, bits.yScale(30));
@@ -613,7 +613,9 @@
                 .attr('x', function (d) { return d.xStart + d.xWidth / 2; })
                 .attr('y', dims.padding.top / 2)
                 .attr('dy', '0.25em')
-                .text(function (d) { return d.name; });
+                .each(function (d) {
+                    fitText(d3.select(this), d.name, d.xWidth);
+                });
 
             // Dots for individual innings
             var inningsDots = nodes.inningsDots = nodes.dataGroupInnings
@@ -693,7 +695,7 @@
             legends.enter()
                 .append('g')
                 .attr('class', function (d) { return 'legend-item legend-item-' + d.key; })
-                .each(addLegend)
+                .each(addLegend);
             legends
                 .attr('transform', function (d) {
                     var x = hackyWidthCounter;
@@ -746,6 +748,18 @@
                     12, 0
                 ]
             ].join('');
+        }
+
+        function fitText(selection, textVersions, maxWidth) {
+            var magicNumberPadding = 10;
+            var text = textVersions.long;
+            selection.text(text);
+            if (textVersions.short !== textVersions.long) {
+                var width = parseFloat(selection.style('width')) || 0;
+                if ((width + magicNumberPadding * 2) > maxWidth) {
+                    selection.text(textVersions.short);
+                }
+            }
         }
 
         chart.colours = function () {

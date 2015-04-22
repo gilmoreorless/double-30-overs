@@ -145,6 +145,24 @@
      *
      *   <odi-graph highlight="..." reset-highlight-averages="true">
      *     Reset averages at highlighted area boundaries
+     *
+     * Formatting for titles
+     *
+     *   `graph-title` attribute and highlight region names can indicate short vs long content.
+     *   The short content will be used if the long version can't fit in the space available.
+     *   « = short version; » = long version
+     *
+     *   "This is a title"
+     *     « This is a title
+     *     » This is a title
+     *
+     *   "Short title· with some extra"
+     *     « Short title
+     *     » Short title with some extra
+     *
+     *   "Short title¬Completely different title"
+     *     « Short title
+     *     » Completely different title
      */
     skate('odi-graph', {
         attached: function (elem) {
@@ -179,7 +197,7 @@
 
     function configMapper(elem) {
         var config = {
-            title: elem.graphTitle || '',
+            title: parseTitle(elem.graphTitle || ''),
             showRollingAverage: elem.rollingAverage === 'true',
             showInningsPoints: elem.inningsPoints !== 'false',
             resetHighlightAverages: elem.resetHighlightAverages === 'true'
@@ -202,6 +220,27 @@
             config.highlightRegions = parseHighlights(elem.highlight);
         }
         return config;
+    }
+
+    /**
+     * Convert titles (graph and regions) into long and short versions
+     * @param  {string} titleStr String from a `graph-title` attribute or a highlight region name
+     * @return {object}          Object with `short` and `long` properties for the two titles
+     */
+    function parseTitle(titleStr) {
+        var shortTitle = titleStr;
+        var longTitle = titleStr;
+        var match = titleStr.match(/^(.*?)([·¬])(.*?)$/);
+        if (match) {
+            shortTitle = match[1];
+            var chr = match[2];
+            if (chr === '·') {
+                longTitle = shortTitle + match[3];
+            } else {
+                longTitle = match[3];
+            }
+        }
+        return {short: shortTitle, long: longTitle};
     }
 
     /**
@@ -272,7 +311,7 @@
             var ret = {};
             var parts = highlight.split(':');
             if (parts.length > 1) {
-                ret.name = parts[0].trim();
+                ret.name = parseTitle(parts[0].trim());
                 var dates = parts[1].split(',').map(function (s) { return s.trim(); });
                 if (dates.length) {
                     ret.start = dates[0];
