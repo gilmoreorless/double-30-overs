@@ -637,7 +637,7 @@
             // Line for overall average
             var lineAverage = dataLine('average');
             var avgPath = nodes.dataGroupAverage
-                .selectAll('path')
+                .selectAll('.line-average-all')
                 .data([data]);
             avgPath.enter()
                 .append('path')
@@ -649,7 +649,7 @@
             // Line for rolling average
             var rollingAverage = dataLine('rolling_average');
             var rollPath = nodes.dataGroupRolling
-                .selectAll('path')
+                .selectAll('.line-average-rolling')
                 .data(options.showRollingAverage ? [data] : []);
             rollPath.enter()
                 .append('path')
@@ -734,7 +734,7 @@
             }
 
             text.attr('x', exampleWidth + examplePadding);
-            d.textWidth = parseFloat(text.style('width')) || 0;
+            d.textWidth = text.node().getComputedTextLength();
             d.totalWidth = d.textWidth + exampleWidth + examplePadding;
             elem.attr('total-width', d.totalWidth);
         }
@@ -751,11 +751,11 @@
         }
 
         function fitText(selection, textVersions, maxWidth) {
-            var magicNumberPadding = 10;
+            var magicNumberPadding = 20;
             var text = textVersions.long;
             selection.text(text);
             if (textVersions.short !== textVersions.long) {
-                var width = parseFloat(selection.style('width')) || 0;
+                var width = selection.node().getComputedTextLength();
                 if ((width + magicNumberPadding * 2) > maxWidth) {
                     selection.text(textVersions.short);
                 }
