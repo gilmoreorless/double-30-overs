@@ -12,14 +12,12 @@ with codecs.open('src/index.md', 'r', 'utf-8') as input:
 
 html = markdown.markdown(source)
 
-# [asidemark]
-asidemark_output = '<sup class="snide-aside-mark">*</sup>'
-html = html.replace('[asidemark]', asidemark_output)
+# Big callout numbers
+# ++1234++
+callout = re.compile('\+\+(.*?)\+\+')
+html = callout.sub('<q class="callout">\\1</q>', html)
 
-# [aside]Content goes here[/aside]
-aside = re.compile('\[aside\](.*?)\[\/aside\]')
-html = aside.sub('<small class="snide-aside">' + asidemark_output + '\\1</small>', html)
-
+# Links to match scorecards on Cricinfo
 # [cric-match id="nnn"]text[/cric-match]
 cric_match = re.compile('\[cric-match id="(.*?)"\](.*?)\[\/cric-match\]')
 html = cric_match.sub('<a href="http://www.espncricinfo.com/ci/engine/match/\\1.html" title="Match #\\1 on Cricinfo">\\2</a>', html)

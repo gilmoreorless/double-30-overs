@@ -19,17 +19,22 @@ h2, h3 {
     margin-top: 1.5em;
 }
 
-/* Snide asides */
-.snide-aside {
+/* Callout stats */
+.callout {
+    background-color: hsl(40, 43%, 87%);
+    border-radius: 2px;
     display: block;
-    font-size: 85%;
-    padding-left: 2em;
+    font-style: italic;
+    font-weight: bold;
+    margin-left: 1em;
+    margin-bottom: 0.5em;
+    padding: 0.25em;
 }
-.snide-aside::before {
-    content: '(';
+.callout::before {
+    content: '• ';
 }
-.snide-aside::after {
-    content: ')';
+.callout::after {
+    content: ''
 }
 
 /* Mythbusters */
@@ -47,7 +52,8 @@ h2, h3 {
     padding: 0.25em;
     text-shadow: 0 1px 6px hsl(51, 55%, 9%);
     text-transform: uppercase;
-    transform: rotate(-5deg);
+    -webkit-transform: rotate(-5deg);
+            transform: rotate(-5deg);
 }
 
 /* Graphs */
@@ -57,6 +63,9 @@ odi-graph {
     position: relative;
     overflow: visible;
     width: 100%;
+}
+odi-graph + odi-graph {
+    margin-top: 1em;
 }
 odi-graph .description {
     height: 1px;
@@ -175,25 +184,44 @@ odi-graph .tooltip dd {
 
 /**
  * BREAKPOINT: Wide enough for two columns
- *\/
-@media (min-width: 400em) {
-    /* Put the snide asides over to the right *\/
-    .snide-aside {
-        display: inline;
-        float: right;
-        margin-right: -53.6%;
-        padding: 0;
-        width: 40%;
+ */
+@media (min-width: 40em) {
+    .content {
+        width: calc(100% - 12rem);
     }
-    .snide-aside::before, .snide-aside::after {
+    /* Put the callouts over to the right */
+    .callout {
+        border-radius: 1em;
+        margin-left: 0;
+        margin-bottom: 0;
+        margin-right: -12rem;
+        float: right;
+        font-size: 2.5em;
+        font-style: normal;
+        padding: 0;
+        position: relative;
+        text-align: center;
+        width: 10rem;
+    }
+    .callout::before, .callout::after {
         content: '';
     }
-    .snide-aside .snide-aside-mark {
-        margin-left: -0.55em;
+    .callout::after {
+        border: 0.25em solid transparent;
+        border-top-color: hsl(40, 43%, 87%);
+        border-top-width: 0.5em;
+        display: block;
+        height: 0;
+        position: absolute;
+        -webkit-transform: translate(-0.2em, -0.35em) rotate(45deg);
+                transform: translate(-0.2em, -0.35em) rotate(45deg);
+        width: 0;
     }
 }
-*/
 
+/**
+ * BREAKPOINT: Wider than content + padding
+ */
 @media (min-width: 992px) {
     body {
         margin-left: auto;

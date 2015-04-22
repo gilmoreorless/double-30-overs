@@ -88,7 +88,7 @@
     function whenVisible(elem, callback) {
         elem.__visCheck = debounce(function visCheck() {
             callIfVisible(elem, callback);
-        }, 300);
+        }, 100);
         window.addEventListener('resize', elem.__visCheck, false);
         window.addEventListener('scroll', elem.__visCheck, false);
         elem.__visCheck();
