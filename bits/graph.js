@@ -509,6 +509,7 @@
         chart.render = function () {
             hasRendered = true;
 
+            var dims = chart.dims;
             var bits = chart.bits;
             var nodes = chart.nodes;
 
@@ -524,6 +525,25 @@
                 [new Date(data[0].date), new Date(data[data.length - 1].date)] :
                 [0, data.length - 1];
             bits.xScale.domain(padXScale(xDomain));
+
+            // Work out how many x axis ticks to show based on available width
+            var xTicksCalculated = false;
+            var xTickYears = 1;
+            var xTickPadding = bits.xAxis.tickPadding();
+            var xTickLabelWidth = 35; // Includes a little extra
+            var xMaxTicks, xTickCount, xTotalWidth;
+
+            while (!xTicksCalculated) {
+                xMaxTicks = bits.xScale.ticks(d3.time.years, xTickYears);
+                xTickCount = xMaxTicks.length;
+                xTotalWidth = xTickCount * xTickLabelWidth + (xTickCount + 1) * xTickPadding;
+                if (xTotalWidth > dims.innerWidth) {
+                    xTickYears++;
+                } else {
+                    xTicksCalculated = true;
+                }
+            }
+            bits.xAxis.ticks(d3.time.years, xTickYears);
 
 
             /*** Helpers ***/
@@ -559,7 +579,7 @@
             nodes.xAxis.call(bits.xAxis);
             nodes.yAxis.call(bits.yAxis);
             nodes.over30line.translate(0, bits.yScale(30));
-            nodes.over30text.translate(chart.dims.innerWidth + 5, bits.yScale(30));
+            nodes.over30text.translate(dims.innerWidth + 5, bits.yScale(30));
 
             // Highlight regions
             options.highlightRegions.forEach(function (d) {
@@ -582,7 +602,7 @@
                 .attr('class', 'background')
                 .attr('x', function (d) { return d.xStart; })
                 .attr('y', 0)
-                .attr('height', chart.dims.padding.top + chart.dims.innerHeight)
+                .attr('height', dims.padding.top + dims.innerHeight)
                 .attr('width', function (d) { return d.xWidth; })
                 .style('fill', function (_, i) {
                     return colours(i);
@@ -591,7 +611,7 @@
                 .attr('class', 'title')
                 .attr('text-anchor', 'middle')
                 .attr('x', function (d) { return d.xStart + d.xWidth / 2; })
-                .attr('y', chart.dims.padding.top / 2)
+                .attr('y', dims.padding.top / 2)
                 .attr('dy', '0.25em')
                 .text(function (d) { return d.name; });
 
@@ -681,7 +701,7 @@
                     hackyWidthCounter += w + itemSpacing;
                     return 'translate(' + x + ', 0)';
                 });
-            nodes.legendInner.translate(chart.dims.innerWidth - hackyWidthCounter + itemSpacing, 0);
+            nodes.legendInner.translate(dims.innerWidth - hackyWidthCounter + itemSpacing, 0);
         };
 
         function addLegend(d) {
