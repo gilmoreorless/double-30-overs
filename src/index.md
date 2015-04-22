@@ -36,7 +36,7 @@ The next task was to filter down individual innings to only those which lasted a
 Answering the first question
 -----------------------------
 
-With the data gathered, I could finally start analysing these 1348 innings to determine at what point teams hit their half-way scores. Or, going back to the questions above, was the 30-over score ever a reliable guideline? Short answer: **Yes** (close enough, anyway).
+With the data gathered, I could finally start analysing these 1348 innings to determine at what point teams hit their halfway scores. Or, going back to the questions above, was the 30-over score ever a reliable guideline? Short answer: **Yes** (close enough, anyway).
 
 Over the last 14 years, teams that have played their full 50 overs have, on average, reached half their score at **29.2** overs (using standard cricket scoring notation, where “29.2 overs” means 29 overs and 2 balls, with 6 balls per over). This is close enough to 30 overs to give a Mythbusters-style <strong class="mythbusters-confirmed">confirmed</strong> to the old maxim.
 

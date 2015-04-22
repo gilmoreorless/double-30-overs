@@ -157,7 +157,7 @@
             var nodes = chart.nodes = {};
 
             nodes.container = selection;
-            nodes.svg = selection.append('svg');
+            nodes.svg = selection.append('svg').attr('class', 'main-graph');
 
             /*** Calculate parameters ***/
 
@@ -166,7 +166,7 @@
                 top: 25,
                 left: 30,
                 right: 60,
-                bottom: 50,
+                bottom: 30,
                 yAxis: 20,
                 xAxis: 3
             };
@@ -227,10 +227,8 @@
             nodes.dataGroupRolling = nodes.dataGroupAll.append('g').attr('class', 'data-rolling-average');
 
             // Legend
-            nodes.legend = nodes.root.append('g')
+            nodes.legend = nodes.container.append('div')
                 .attr('class', 'legend');
-            nodes.legendInner = nodes.legend.append('g')
-                .attr('class', 'legend-inner');
 
             // Line on hover
             nodes.hoverLine = nodes.root.append('line')
@@ -287,6 +285,8 @@
             bits.xScale.range([0, dims.innerWidth]);
             bits.yScale.range([dims.innerHeight, 0]);
 
+            var axisClearance = 30;
+
             nodes.title
                 .attr('x', padding.left + (dims.innerWidth / 2))
                 .attr('y', padding.top / 2);
@@ -296,7 +296,7 @@
             nodes.over30.translate(padding.left, padding.top);
             nodes.over30line.attr('x2', dims.innerWidth);
             nodes.dataGroupAll.translate(padding.left, padding.top);
-            nodes.legend.translate(padding.left, dims.height - padding.bottom + 30); // +30 == Clear the x axis
+            nodes.legend.style('margin-right', padding.right + 'px');
             nodes.hoverLine.attr('y2', dims.innerHeight);
             nodes.eventRect
                 .attr('width', dims.innerWidth)
@@ -304,7 +304,7 @@
                 .translate(padding.left, padding.top);
             nodes.tooltip
                 .style('left', padding.left + 'px')
-                .style('top', (padding.top + dims.innerHeight + 30) + 'px');
+                .style('top', (padding.top + dims.innerHeight + axisClearance) + 'px');
         };
 
         chart.data = function (newData) {
@@ -684,34 +684,24 @@
                     name: '100-innings rolling average'
                 });
             }
-            var legends = nodes.legendInner
+            var legends = nodes.legend
                 .selectAll('.legend-item')
                 .data(legendData);
             legends.exit()
                 .remove();
-
-            var hackyWidthCounter = 0;
-            var itemSpacing = 20;
             legends.enter()
-                .append('g')
+                .append('svg')
                 .attr('class', function (d) { return 'legend-item legend-item-' + d.key; })
                 .each(addLegend);
-            legends
-                .attr('transform', function (d) {
-                    var x = hackyWidthCounter;
-                    var w = d.totalWidth || parseFloat(d3.select(this).attr('total-width')) || 0;
-                    hackyWidthCounter += w + itemSpacing;
-                    return 'translate(' + x + ', 0)';
-                });
-            nodes.legendInner.translate(dims.innerWidth - hackyWidthCounter + itemSpacing, 0);
         };
 
         function addLegend(d) {
             var legendHeight = 19;
             var examplePadding = 7;
-            var exampleWidth; // Filled later
+            var exampleWidth = 12;
 
-            var elem = d3.select(this);
+            var elem = d3.select(this)
+                .attr('height', legendHeight);
             var example = elem.append(d.type)
                 .attr('class', 'legend-example');
             var text = elem.append('text')
@@ -721,22 +711,20 @@
                 .text(d.name);
 
             if (d.type === 'circle') {
-                exampleWidth = 8;
                 example
-                    .attr('r', exampleWidth / 2)
-                    .attr('cx', exampleWidth / 2)
+                    .attr('r', 4)
+                    .attr('cx', exampleWidth / 2 + examplePadding)
                     .attr('cy', legendHeight / 2);
             } else if (d.type === 'path') {
-                exampleWidth = 12;
                 example
                     .attr('d', legendPath())
-                    .translate(0, (legendHeight - exampleWidth) / 2);
+                    .translate(examplePadding, (legendHeight - exampleWidth) / 2);
             }
 
-            text.attr('x', exampleWidth + examplePadding);
+            text.attr('x', exampleWidth + examplePadding * 2);
             d.textWidth = text.node().getComputedTextLength();
-            d.totalWidth = d.textWidth + exampleWidth + examplePadding;
-            elem.attr('total-width', d.totalWidth);
+            d.totalWidth = d.textWidth + exampleWidth + examplePadding * 2;
+            elem.attr('width', d.totalWidth);
         }
 
         function legendPath() {

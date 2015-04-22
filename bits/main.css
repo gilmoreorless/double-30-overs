@@ -77,10 +77,11 @@ odi-graph .description {
 }
 odi-graph svg {
     display: block;
-    height: 250px;
     font-size: 0.75em;
+}
+odi-graph .main-graph {
+    height: 230px;
     width: 100%;
-    display: block;
 }
 odi-graph .title {
     font-size: 1.25em;
@@ -141,6 +142,10 @@ odi-graph .hover-rule.active {
 }
 odi-graph .hover-events {
     opacity: 0;
+}
+odi-graph .legend-item {
+    display: inline-block;
+    margin-left: 20px;
 }
 odi-graph .tooltip {
     background-color: hsl(41, 81%, 91%);
