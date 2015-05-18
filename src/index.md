@@ -57,7 +57,7 @@ In order to find the answer, I graphed out a 100-innings rolling average, to giv
 
 <odi-graph graph-title="Overall vs rolling average"
     rolling-average="true" innings-points="false">
-    IMAGE: A graph showing a rolling average average halfway mark as described in the next paragraph.
+    IMAGE: A graph showing a rolling average halfway mark as described in the next paragraph.
 </odi-graph>
 
 This shows a few more peaks and troughs, reaching a lowest point of 27.5 overs in 2002, then jumping up to 29.4 overs in 2004. After another drop to 28.3 overs in 2006, the rolling average remained relatively stable between 29.1 and 29.4 overs for many years. Since the beginning of 2013, the scoring rate has significantly increased, bringing the average for the most recent 100 innings (which reached 50 overs) up to 30.5 overs – the highest it’s ever been.
@@ -136,7 +136,7 @@ Credits
 
 The main inspirations for this were the [MBTA (Boston subway) data analysis](http://mbtaviz.github.io/) and some random conversations with fellow cricket tragics at work.
 
-Statistics include all men’s One-Day Internationals from June 7th, 2001 to March 29, 2015.
+Statistics include all men’s One-Day Internationals from June 7th, 2001 to March 29th, 2015.
 
 All data originally came from [Cricinfo](http://www.espncricinfo.com/) and are probably under copyright, but it’s very hard to find any data usage guidelines on their website. These analyses were done as a personal hobby project only.
 Cricinfo also did [an analysis of run-rates in the 2015 World Cup](http://www.espncricinfo.com/magazine/content/story/858093.html) that is worth reading.

@@ -157,7 +157,7 @@
             var nodes = chart.nodes = {};
 
             nodes.container = selection;
-            nodes.svg = selection.append('svg').attr('class', 'main-graph');
+            nodes.svg = selection.insert('svg', ':first-child').attr('class', 'main-graph');
 
             /*** Calculate parameters ***/
 
@@ -201,16 +201,20 @@
 
             // Axes
             nodes.xAxis = nodes.root.append('g')
+                .attr('aria-hidden', 'true')
                 .attr('class', 'axis-x');
             nodes.yAxis = nodes.root.append('g')
+                .attr('aria-hidden', 'true')
                 .attr('class', 'axis-y');
 
             // Highlight regions
             nodes.highlights = nodes.root.append('g')
+                .attr('aria-hidden', 'true')
                 .attr('class', 'highlight-regions');
 
             // 30-over mark
             nodes.over30 = nodes.root.append('g')
+                .attr('aria-hidden', 'true')
                 .attr('class', 'over-30');
             nodes.over30line = nodes.over30.append('line')
                 .attr('x', 0)
@@ -228,6 +232,7 @@
 
             // Legend
             nodes.legend = nodes.container.append('div')
+                .attr('aria-hidden', 'true')
                 .attr('class', 'legend');
 
             // Line on hover
