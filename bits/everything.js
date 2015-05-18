@@ -11272,7 +11272,7 @@ __880d751441dbbd15758abf63053bf506 = (function () {
             var nodes = chart.nodes = {};
 
             nodes.container = selection;
-            nodes.svg = selection.append('svg').attr('class', 'main-graph');
+            nodes.svg = selection.insert('svg', ':first-child').attr('class', 'main-graph');
 
             /*** Calculate parameters ***/
 
@@ -11316,16 +11316,20 @@ __880d751441dbbd15758abf63053bf506 = (function () {
 
             // Axes
             nodes.xAxis = nodes.root.append('g')
+                .attr('aria-hidden', 'true')
                 .attr('class', 'axis-x');
             nodes.yAxis = nodes.root.append('g')
+                .attr('aria-hidden', 'true')
                 .attr('class', 'axis-y');
 
             // Highlight regions
             nodes.highlights = nodes.root.append('g')
+                .attr('aria-hidden', 'true')
                 .attr('class', 'highlight-regions');
 
             // 30-over mark
             nodes.over30 = nodes.root.append('g')
+                .attr('aria-hidden', 'true')
                 .attr('class', 'over-30');
             nodes.over30line = nodes.over30.append('line')
                 .attr('x', 0)
@@ -11343,6 +11347,7 @@ __880d751441dbbd15758abf63053bf506 = (function () {
 
             // Legend
             nodes.legend = nodes.container.append('div')
+                .attr('aria-hidden', 'true')
                 .attr('class', 'legend');
 
             // Line on hover
@@ -12169,19 +12174,33 @@ __880d751441dbbd15758abf63053bf506 = (function () {
      */
     skate('odi-graph', {
         attached: function (elem) {
-            // Move the descriptive text into a hidden span
-            var desc = document.createElement('span');
-            desc.className = 'description';
-            desc.textContent = elem.textContent;
+            /**
+             * Set up internal structure:
+             *
+             * <odi-graph>
+             *   <figure>
+             *     <figcaption>(Descriptive text)</figcaption>
+             *     <svg>(Graph)</svg>
+             *   </figure>
+             * </odi-graph>
+             */
+            var figure = document.createElement('figure');
+
+            // Move the descriptive text into a hidden figcaption
+            var caption = document.createElement('figcaption');
+            caption.textContent = elem.textContent;
+            figure.appendChild(caption);
+
+            // Replace the element text with the figure
             elem.innerHTML = '';
-            elem.appendChild(desc);
+            elem.appendChild(figure);
 
             // Create the graph
             elem.graph = new ODIGraph();
             queue(elem, function () {
                 elem.graph.init(cloneData(stats.data), configMapper(elem));
                 onceVisible(elem, function () {
-                    elem.graph.render(elem);
+                    elem.graph.render(figure);
                 });
             });
         },
