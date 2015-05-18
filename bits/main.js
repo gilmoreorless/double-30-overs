@@ -166,19 +166,33 @@
      */
     skate('odi-graph', {
         attached: function (elem) {
-            // Move the descriptive text into a hidden span
-            var desc = document.createElement('span');
-            desc.className = 'description';
-            desc.textContent = elem.textContent;
+            /**
+             * Set up internal structure:
+             *
+             * <odi-graph>
+             *   <figure>
+             *     <figcaption>(Descriptive text)</figcaption>
+             *     <svg>(Graph)</svg>
+             *   </figure>
+             * </odi-graph>
+             */
+            var figure = document.createElement('figure');
+
+            // Move the descriptive text into a hidden figcaption
+            var caption = document.createElement('figcaption');
+            caption.textContent = elem.textContent;
+            figure.appendChild(caption);
+
+            // Replace the element text with the figure
             elem.innerHTML = '';
-            elem.appendChild(desc);
+            elem.appendChild(figure);
 
             // Create the graph
             elem.graph = new ODIGraph();
             queue(elem, function () {
                 elem.graph.init(cloneData(stats.data), configMapper(elem));
                 onceVisible(elem, function () {
-                    elem.graph.render(elem);
+                    elem.graph.render(figure);
                 });
             });
         },

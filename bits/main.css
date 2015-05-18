@@ -67,7 +67,7 @@ odi-graph {
 odi-graph + odi-graph {
     margin-top: 1em;
 }
-odi-graph .description {
+odi-graph figcaption {
     height: 1px;
     left: -10000px;
     overflow: hidden;
