@@ -23,11 +23,11 @@ The data
 
 ++3646++ In order to properly study scoring patterns, I needed ball-by-ball data for as many ODI (One-Day International) matches as possible. At the time of writing (just after the 2015 World Cup finished), since the first ODI in 1971 there have been **3646** ODIs where at least one ball was bowled (so this number excludes matches that were abandoned before play started, generally due to rain).
 
-++1899++ Ball-by-ball data was not collected in the early years of one-day cricket. The first match I could find on [Cricinfo](http://www.espncricinfo.com/) with ball-by-ball data for was in 1999, leaving **1899** matches with data that I could analyse.
+++1899++ Ball-by-ball data was not collected in the early years of one-day cricket. The first match I could find on [Cricinfo](http://www.espncricinfo.com/) with ball-by-ball data was in 1999, leaving **1899** matches with data that I could analyse.
 
 ++1858++ However, there was only ball-by-ball data for a handful of matches in 1999 and none at all in 2000. It wasn’t until mid-2001 that ball-by-ball data was available for each match. Including a small number of matches from 1999 and then jumping forward 2 years wouldn’t provide accurate data trends, so I had to exclude all matches before June 7th, 2001. This reduced the count to **1858** matches.
 
-The next task was to filter down individual innings to only those which lasted a full 50 overs. (Early ODI matches were 60 overs per innings, but these were all well before the 2001 data cut-off.) The “double 30 overs” rule only works for teams that complete a 50 over innings. Any team getting having its innings cut short (e.g. by losing all its wickets, or rain reducing the overs available) loses the ability to pace its innings properly and would skew the statistics.
+The next task was to filter down individual innings to only those which lasted a full 50 overs. (Early ODI matches were 60 overs per innings, but these were all well before the 2001 data cut-off.) The “double 30 overs” rule only works for teams that complete a 50 over innings. Any team having its innings cut short (e.g. by losing all its wickets, or rain reducing the overs available) loses the ability to pace its innings properly and would skew the statistics.
 
 ++1348++ 1858 matches with 2 innings per match gives 3716 innings in total (not all of which will have been played, due to rain or other interruptions). Restricting to only those lasting a full 50 overs reduces the list to **1348** innings, or 36%. Of these, **1173** (87%) are from the first innings of the match. This is hardly surprising, as the team batting second is most likely to either lose by being bowled out chasing a target score, or win by chasing the target before reaching 50 overs.
 
