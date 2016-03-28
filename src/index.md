@@ -142,3 +142,5 @@ All data originally came from [Cricinfo](http://www.espncricinfo.com/) and are p
 Cricinfo also did [an analysis of run-rates in the 2015 World Cup](http://www.espncricinfo.com/magazine/content/story/858093.html) that is worth reading.
 
 The rest of the content here is &copy; 2015 Gilmore Davidson. The source code is available on [GitHub](https://github.com/gilmoreorless/double-30-overs) for those interested.
+
+A write-up of the technology used to build this article was posted on my personal blog: [Responsive graphs and custom elements](https://shoehornwithteeth.com/ramblings/2015/05/responsive-graphs-and-custom-elements/).
